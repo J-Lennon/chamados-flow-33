@@ -1,4 +1,4 @@
-import { Search, Moon, Sun, User, Bell, Settings } from "lucide-react"
+import { Search, Moon, Sun, User, Bell, Settings, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
+import { CreateUserDialog } from "./CreateUserDialog"
 
 export function Header() {
   const { theme, setTheme } = useTheme()
@@ -24,7 +25,7 @@ export function Header() {
             <Settings className="h-4 w-4 text-white" />
           </div>
           <span className="hidden text-lg font-semibold sm:inline-block">
-            Helpdesk Pro
+            LDesk
           </span>
         </div>
 
@@ -41,6 +42,9 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Create new user - admin only */}
+          <CreateUserDialog />
+          
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-4 w-4" />
@@ -76,16 +80,20 @@ export function Header() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <div className="flex items-center justify-start gap-2 p-2">
                 <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">Maria Almeida</p>
+                  <p className="font-medium">Admin LDesk</p>
                   <p className="w-[200px] truncate text-sm text-muted-foreground">
-                    maria.almeida@empresa.com
+                    admin@ldesk.com
                   </p>
                 </div>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
+                <span>Alterar foto</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <User className="mr-2 h-4 w-4" />
+                <span>Alterar apelido</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="mr-2 h-4 w-4" />

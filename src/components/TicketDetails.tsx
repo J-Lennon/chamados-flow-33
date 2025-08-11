@@ -2,12 +2,23 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
 import { Ticket } from "./TicketsList"
 import {
@@ -68,7 +79,40 @@ const mockAttachments = [
 ]
 
 export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
+  const [rejectReason, setRejectReason] = useState("")
+  const [newMessage, setNewMessage] = useState("")
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
+
   if (!ticket) return null
+
+  const handleAcceptTicket = () => {
+    // TODO: Implementar com Supabase
+    console.log("Ticket aceito:", ticket.id)
+  }
+
+  const handleRejectTicket = () => {
+    if (rejectReason.trim()) {
+      // TODO: Implementar com Supabase
+      console.log("Ticket rejeitado:", ticket.id, "Motivo:", rejectReason)
+      setRejectReason("")
+      setIsRejectDialogOpen(false)
+    }
+  }
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      // TODO: Implementar com Supabase
+      console.log("Mensagem enviada:", newMessage)
+      setNewMessage("")
+      setIsMessageDialogOpen(false)
+    }
+  }
+
+  const handleCompleteTicket = () => {
+    // TODO: Implementar com Supabase
+    console.log("Ticket concluído:", ticket.id)
+  }
 
   const getSLAStatus = (sla: Date) => {
     const now = new Date()
@@ -109,21 +153,76 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-2">
-            <Button size="sm">
+            <Button size="sm" onClick={handleAcceptTicket}>
               <UserCheck className="mr-2 h-4 w-4" />
               Aceitar
             </Button>
-            <Button size="sm" variant="outline">
-              <User className="mr-2 h-4 w-4" />
-              Atribuir
-            </Button>
-            <Button size="sm" variant="outline">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Adicionar Nota
-            </Button>
-            <Button size="sm" variant="outline">
+            
+            <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="destructive">
+                  <X className="mr-2 h-4 w-4" />
+                  Recusar
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-background border shadow-lg">
+                <DialogHeader>
+                  <DialogTitle>Recusar Chamado</DialogTitle>
+                  <DialogDescription>
+                    Por favor, informe o motivo da recusa deste chamado.
+                  </DialogDescription>
+                </DialogHeader>
+                <Textarea
+                  placeholder="Digite o motivo da recusa..."
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button variant="destructive" onClick={handleRejectTicket}>
+                    Confirmar Recusa
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Enviar Pergunta
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-background border shadow-lg">
+                <DialogHeader>
+                  <DialogTitle>Enviar Pergunta ao Usuário</DialogTitle>
+                  <DialogDescription>
+                    Faça uma pergunta para esclarecer dúvidas sobre este chamado.
+                  </DialogDescription>
+                </DialogHeader>
+                <Textarea
+                  placeholder="Digite sua pergunta..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSendMessage}>
+                    Enviar Pergunta
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Button size="sm" variant="outline" onClick={handleCompleteTicket}>
               <CheckCircle className="mr-2 h-4 w-4" />
-              Fechar
+              Concluir
             </Button>
           </div>
         </SheetHeader>
