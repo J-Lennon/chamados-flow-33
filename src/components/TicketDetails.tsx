@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Sheet,
   SheetContent,
@@ -20,13 +20,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
-import { Ticket } from "./TicketsList"
+import { Ticket, useTickets } from "@/hooks/useTickets"
+import { useTicketMessages } from "@/hooks/useTicketMessages"
+import { useTicketHistory } from "@/hooks/useTicketHistory"
+import { useAuth } from "@/hooks/useAuth"
 import {
   Clock,
   User,
   Building,
   MessageSquare,
-  Paperclip,
   UserCheck,
   CheckCircle,
   X,
@@ -41,82 +43,49 @@ interface TicketDetailsProps {
   onClose: () => void
 }
 
-const mockActivities = [
-  {
-    id: 1,
-    type: "status_change",
-    user: "Carlos Silva",
-    description: "alterou o status para Em Andamento",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: 2,
-    type: "assignment",
-    user: "Ana Rodrigues",
-    description: "atribuiu o chamado para Carlos Silva",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-  },
-  {
-    id: 3,
-    type: "comment",
-    user: "João Oliveira",
-    description: "adicionou um comentário",
-    comment: "Problema persiste após reinicialização da impressora.",
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
-  },
-  {
-    id: 4,
-    type: "created",
-    user: "João Oliveira",
-    description: "criou o chamado",
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-]
-
-const mockAttachments = [
-  { id: 1, name: "erro_impressora.jpg", size: "245 KB", type: "image" },
-  { id: 2, name: "log_sistema.txt", size: "12 KB", type: "text" },
-]
-
 export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
   const [rejectReason, setRejectReason] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
   const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
+  
+  const { user } = useAuth()
+  const { acceptTicket, rejectTicket, sendMessage, completeTicket } = useTickets()
+  const { messages } = useTicketMessages(ticket?.id || null)
+  const { history } = useTicketHistory(ticket?.id || null)
 
   if (!ticket) return null
 
-  const handleAcceptTicket = () => {
-    // TODO: Implementar com Supabase
-    console.log("Ticket aceito:", ticket.id)
+  const handleAcceptTicket = async () => {
+    if (!user) return
+    await acceptTicket(ticket.id, user.id)
+    onClose()
   }
 
-  const handleRejectTicket = () => {
-    if (rejectReason.trim()) {
-      // TODO: Implementar com Supabase
-      console.log("Ticket rejeitado:", ticket.id, "Motivo:", rejectReason)
-      setRejectReason("")
-      setIsRejectDialogOpen(false)
-    }
+  const handleRejectTicket = async () => {
+    if (!user || !rejectReason.trim()) return
+    await rejectTicket(ticket.id, user.id, rejectReason)
+    setRejectReason("")
+    setIsRejectDialogOpen(false)
+    onClose()
   }
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // TODO: Implementar com Supabase
-      console.log("Mensagem enviada:", newMessage)
-      setNewMessage("")
-      setIsMessageDialogOpen(false)
-    }
+  const handleSendMessage = async () => {
+    if (!user || !newMessage.trim()) return
+    await sendMessage(ticket.id, user.id, newMessage)
+    setNewMessage("")
+    setIsMessageDialogOpen(false)
   }
 
-  const handleCompleteTicket = () => {
-    // TODO: Implementar com Supabase
-    console.log("Ticket concluído:", ticket.id)
+  const handleCompleteTicket = async () => {
+    await completeTicket(ticket.id)
+    onClose()
   }
 
-  const getSLAStatus = (sla: Date) => {
+  const getSLAStatus = (sla: string) => {
+    const slaDate = new Date(sla)
     const now = new Date()
-    const timeLeft = sla.getTime() - now.getTime()
+    const timeLeft = slaDate.getTime() - now.getTime()
     const hoursLeft = timeLeft / (1000 * 60 * 60)
 
     if (hoursLeft < 0) {
@@ -131,7 +100,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
     }
   }
 
-  const slaStatus = getSLAStatus(ticket.sla)
+  const slaStatus = getSLAStatus(ticket.sla_due_date)
 
   return (
     <Sheet open={isOpen} onOpenChange={() => onClose()}>
@@ -140,9 +109,9 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <SheetTitle className="font-mono text-lg">{ticket.id}</SheetTitle>
-                <StatusBadge status={ticket.status} />
-                <PriorityBadge priority={ticket.priority} />
+                <SheetTitle className="font-mono text-lg">#{ticket.id.slice(0, 8)}</SheetTitle>
+                <StatusBadge status={ticket.status as any} />
+                <PriorityBadge priority={ticket.priority as any} />
               </div>
               <h2 className="text-xl font-semibold leading-tight">{ticket.title}</h2>
             </div>
@@ -259,7 +228,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                 <User className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <div className="text-sm font-medium">Solicitante</div>
-                  <div className="text-sm text-muted-foreground">{ticket.requester}</div>
+                  <div className="text-sm text-muted-foreground">{ticket.requester?.full_name || "Desconhecido"}</div>
                 </div>
               </div>
 
@@ -278,7 +247,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                 <div>
                   <div className="text-sm font-medium">Responsável</div>
                   <div className="text-sm text-muted-foreground">
-                    {ticket.assignee || "Não atribuído"}
+                    {ticket.assignee?.full_name || "Não atribuído"}
                   </div>
                 </div>
               </div>
@@ -288,7 +257,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                 <div>
                   <div className="text-sm font-medium">Criado em</div>
                   <div className="text-sm text-muted-foreground">
-                    {format(ticket.createdAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    {format(new Date(ticket.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </div>
                 </div>
               </div>
@@ -297,65 +266,71 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
           <Separator />
 
-          {/* Attachments */}
-          <div className="space-y-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Paperclip className="h-4 w-4" />
-              Anexos ({mockAttachments.length})
-            </h3>
-            <div className="space-y-2">
-              {mockAttachments.map((attachment) => (
-                <div key={attachment.id} className="flex items-center gap-3 p-2 border rounded-lg">
-                  <div className="w-8 h-8 rounded bg-muted flex items-center justify-center">
-                    <Paperclip className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{attachment.name}</div>
-                    <div className="text-xs text-muted-foreground">{attachment.size}</div>
-                  </div>
-                  <Button size="sm" variant="outline">
-                    Download
-                  </Button>
+          {/* Messages */}
+          {messages.length > 0 && (
+            <>
+              <div className="space-y-3">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Mensagens ({messages.length})
+                </h3>
+                <div className="space-y-3">
+                  {messages.map((message) => (
+                    <div key={message.id} className="p-3 border rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium">
+                          {message.sender?.full_name || "Usuário"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(message.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <p className="text-sm">{message.message}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
+              </div>
+              <Separator />
+            </>
+          )}
 
           {/* Activity Timeline */}
           <div className="space-y-3">
             <h3 className="font-semibold">Histórico de Atividades</h3>
-            <div className="space-y-4">
-              {mockActivities.map((activity, index) => (
-                <div key={activity.id} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">
-                        {activity.user.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    {index < mockActivities.length - 1 && (
-                      <div className="w-px h-8 bg-border mt-2" />
-                    )}
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <div className="text-sm">
-                      <span className="font-medium">{activity.user}</span>{" "}
-                      <span className="text-muted-foreground">{activity.description}</span>
+            {history.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhuma atividade registrada</p>
+            ) : (
+              <div className="space-y-4">
+                {history.map((item, index) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {item.user?.full_name?.split(" ").map(n => n[0]).join("") || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      {index < history.length - 1 && (
+                        <div className="w-px h-8 bg-border mt-2" />
+                      )}
                     </div>
-                    {activity.comment && (
-                      <div className="text-sm bg-muted/50 p-2 rounded border-l-2 border-primary/30">
-                        {activity.comment}
+                    <div className="flex-1 space-y-1">
+                      <div className="text-sm">
+                        <span className="font-medium">{item.user?.full_name || "Sistema"}</span>{" "}
+                        <span className="text-muted-foreground">{item.action}</span>
                       </div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(activity.timestamp, { addSuffix: true, locale: ptBR })}
+                      {item.details && (
+                        <div className="text-sm bg-muted/50 p-2 rounded border-l-2 border-primary/30">
+                          {item.details}
+                        </div>
+                      )}
+                      <div className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true, locale: ptBR })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </SheetContent>
