@@ -59,7 +59,7 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="tickets" className="space-y-4">
-            <TicketFilters />
+            <TicketFilters onFiltersChange={() => {}} />
             <TicketsList onTicketSelect={handleTicketSelect} />
           </TabsContent>
         </Tabs>

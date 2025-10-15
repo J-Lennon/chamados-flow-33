@@ -1,4 +1,5 @@
-import { Search, Moon, Sun, User, Bell, Settings, UserPlus } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Search, Moon, Sun, User, Settings, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -6,15 +7,64 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
 import { CreateUserDialog } from "./CreateUserDialog"
+import { NotificationsPopover } from "./NotificationsPopover"
+import { ProfileSettingsDialog } from "./ProfileSettingsDialog"
+import { useAuth } from "@/hooks/useAuth"
+import { useUserRole } from "@/hooks/useUserRole"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 export function Header() {
   const { theme, setTheme } = useTheme()
+  const { user } = useAuth()
+  const { isAdmin } = useUserRole(user?.id)
+  const { toast } = useToast()
+  const [profile, setProfile] = useState<{ full_name: string; avatar_url?: string } | null>(null)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.id) return
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("id", user.id)
+        .single()
+
+      if (data) setProfile(data)
+    }
+
+    fetchProfile()
+  }, [user?.id])
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut()
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso",
+      })
+    } catch (error) {
+      toast({
+        title: "Erro ao sair",
+        description: "Não foi possível desconectar",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const initials = profile?.full_name
+    ?.split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase() || "U"
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,18 +90,10 @@ export function Header() {
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Create new user - admin only */}
-          <CreateUserDialog />
+          {isAdmin && <CreateUserDialog />}
           
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-4 w-4" />
-            <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs"
-            >
-              3
-            </Badge>
-          </Button>
+          <NotificationsPopover />
 
           {/* Theme toggle */}
           <Button
@@ -69,41 +111,44 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="/avatars/01.png" alt="@usuario" />
-                  <AvatarFallback>MA</AvatarFallback>
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.full_name} />
+                  <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
-              <div className="flex items-center justify-start gap-2 p-2">
-                <div className="flex flex-col space-y-1 leading-none">
-                  <p className="font-medium">Admin LDesk</p>
-                  <p className="w-[200px] truncate text-sm text-muted-foreground">
-                    admin@ldesk.com
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="font-medium">{profile?.full_name || "Usuário"}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.email}
                   </p>
                 </div>
-              </div>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Alterar foto</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Alterar apelido</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+
+      {user && profile && (
+        <ProfileSettingsDialog
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          currentName={profile.full_name}
+          currentAvatar={profile.avatar_url}
+          userId={user.id}
+        />
+      )}
     </header>
   )
 }
