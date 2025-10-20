@@ -41,32 +41,45 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
     try {
       console.log("Criando usuário:", { email, name, role })
       
-      // Create user via Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Generate temporary password
+      const tempPassword = Math.random().toString(36).slice(-8) + "Aa1!"
+      
+      const redirectUrl = `${window.location.origin}/`
+      
+      // Create user with signUp
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
-        password: Math.random().toString(36).slice(-8) + "Aa1!", // Generate temporary password
-        email_confirm: true,
-        user_metadata: {
-          full_name: name,
+        password: tempPassword,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: redirectUrl,
         },
       })
 
-      if (authError) throw authError
-      if (!authData.user) throw new Error("User creation failed")
+      if (signUpError) throw signUpError
+      if (!authData.user) throw new Error("Failed to create user")
 
-      // Assign role in user_roles table
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: authData.user.id,
-          role: role,
-        })
+      // Wait for trigger to create profile and default role
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      if (roleError) throw roleError
+      // Update role if not 'user' (default from trigger)
+      if (role !== "user") {
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .update({ role: role })
+          .eq("user_id", authData.user.id)
+
+        if (roleError) {
+          console.error("Error updating role:", roleError)
+          throw roleError
+        }
+      }
 
       toast({
         title: "Usuário criado!",
-        description: `${name} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}`,
+        description: `${name} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Senha: ${tempPassword}`,
       })
 
       setOpen(false)
@@ -77,7 +90,7 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
       console.error("Erro ao criar usuário:", error)
       toast({
         title: "Erro ao criar usuário",
-        description: error.message,
+        description: error.message || "Tente novamente",
         variant: "destructive",
       })
     } finally {
