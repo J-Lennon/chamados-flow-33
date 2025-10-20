@@ -13,8 +13,6 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle,
-  TrendingUp,
-  TrendingDown,
   Users,
   ArrowRight,
   BarChart3,
@@ -22,112 +20,78 @@ import {
   Calendar,
   Download
 } from "lucide-react"
-
-const kpiData = [
-  {
-    title: "Novos",
-    value: 12,
-    trend: { value: "+8%", isPositive: false },
-    icon: AlertTriangle,
-    color: "text-status-new"
-  },
-  {
-    title: "Em Andamento",
-    value: 24,
-    trend: { value: "+12%", isPositive: true },
-    icon: Clock,
-    color: "text-status-progress"
-  },
-  {
-    title: "Concluídos",
-    value: 87,
-    trend: { value: "+23%", isPositive: true },
-    icon: CheckCircle,
-    color: "text-status-completed"
-  },
-  {
-    title: "Atrasados",
-    value: 5,
-    trend: { value: "-2%", isPositive: true },
-    icon: AlertTriangle,
-    color: "text-status-overdue"
-  },
-  {
-    title: "SLA Próximo",
-    value: 8,
-    trend: { value: "+15%", isPositive: false },
-    icon: Clock,
-    color: "text-status-waiting"
-  }
-]
-
-const statusQueue = [
-  { status: "Novos", count: 12, href: "/tickets?status=new" },
-  { status: "Em Espera", count: 8, href: "/tickets?status=waiting" },
-  { status: "Aceitos", count: 15, href: "/tickets?status=accepted" },
-  { status: "Em Andamento", count: 24, href: "/tickets?status=progress" },
-  { status: "Concluídos", count: 87, href: "/tickets?status=completed" },
-]
-
-const priorityDistribution = [
-  { priority: "critical", label: "Crítica", count: 5, percentage: 12 },
-  { priority: "high", label: "Alta", count: 18, percentage: 43 },
-  { priority: "medium", label: "Média", count: 15, percentage: 36 },
-  { priority: "low", label: "Baixa", count: 4, percentage: 9 },
-] as const
-
-const urgentTickets = [
-  {
-    id: "#002",
-    title: "Sistema ERP fora do ar",
-    requester: "Maria Santos",
-    sla: "2h restantes",
-    priority: "critical" as const,
-    status: "progress" as const
-  },
-  {
-    id: "#005",
-    title: "Backup do servidor falhou",
-    requester: "Sistema Automático",
-    sla: "Atrasado 2h",
-    priority: "critical" as const,
-    status: "overdue" as const
-  },
-  {
-    id: "#001",
-    title: "Impressora não funciona",
-    requester: "João Oliveira",
-    sla: "4h restantes",
-    priority: "high" as const,
-    status: "new" as const
-  },
-  {
-    id: "#008",
-    title: "Rede lenta no setor vendas",
-    requester: "Pedro Costa",
-    sla: "6h restantes",
-    priority: "high" as const,
-    status: "accepted" as const
-  }
-]
-
-const topAssignees = [
-  { name: "Carlos Silva", count: 12, avatar: "CS" },
-  { name: "Ana Rodrigues", count: 9, avatar: "AR" },
-  { name: "Roberto Lima", count: 8, avatar: "RL" },
-  { name: "Fernanda Costa", count: 6, avatar: "FC" },
-  { name: "Marcos Santos", count: 5, avatar: "MS" }
-]
-
-const volumeData = Array.from({ length: 14 }, (_, i) => ({
-  date: new Date(Date.now() - (13 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR', { 
-    day: '2-digit', 
-    month: '2-digit' 
-  }),
-  tickets: Math.floor(Math.random() * 15) + 5
-}))
+import { useDashboardData } from "@/hooks/useDashboardData"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function Dashboard() {
+  const { data, loading } = useDashboardData()
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-32" />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const kpiData = [
+    {
+      title: "Novos",
+      value: data.kpiData.new,
+      icon: AlertTriangle,
+      color: "text-status-new"
+    },
+    {
+      title: "Em Andamento",
+      value: data.kpiData.progress,
+      icon: Clock,
+      color: "text-status-progress"
+    },
+    {
+      title: "Concluídos",
+      value: data.kpiData.completed,
+      icon: CheckCircle,
+      color: "text-status-completed"
+    },
+    {
+      title: "Atrasados",
+      value: data.kpiData.overdue,
+      icon: AlertTriangle,
+      color: "text-status-overdue"
+    },
+    {
+      title: "SLA Próximo",
+      value: data.kpiData.slaClose,
+      icon: Clock,
+      color: "text-status-waiting"
+    }
+  ]
+
+  const statusQueue = [
+    { status: "Novos", count: data.statusQueue.new },
+    { status: "Em Espera", count: data.statusQueue.waiting },
+    { status: "Aceitos", count: data.statusQueue.accepted },
+    { status: "Em Andamento", count: data.statusQueue.progress },
+    { status: "Concluídos", count: data.statusQueue.completed },
+  ]
+
+  const priorityDistribution = [
+    { priority: "critical" as const, label: "Crítica", count: data.priorityDistribution.critical },
+    { priority: "high" as const, label: "Alta", count: data.priorityDistribution.high },
+    { priority: "medium" as const, label: "Média", count: data.priorityDistribution.medium },
+    { priority: "low" as const, label: "Baixa", count: data.priorityDistribution.low },
+  ]
+
+  const totalTickets = priorityDistribution.reduce((sum, p) => sum + p.count, 0)
+  const priorityWithPercentage = priorityDistribution.map(p => ({
+    ...p,
+    percentage: totalTickets > 0 ? Math.round((p.count / totalTickets) * 100) : 0
+  }))
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -162,7 +126,6 @@ export function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {kpiData.map((kpi) => {
           const Icon = kpi.icon
-          const TrendIcon = kpi.trend.isPositive ? TrendingUp : TrendingDown
           
           return (
             <Card key={kpi.title} className="bg-gradient-card">
@@ -174,17 +137,6 @@ export function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{kpi.value}</div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <TrendIcon className={`mr-1 h-3 w-3 ${
-                    kpi.trend.isPositive ? 'text-green-500' : 'text-red-500'
-                  }`} />
-                  <span className={
-                    kpi.trend.isPositive ? 'text-green-500' : 'text-red-500'
-                  }>
-                    {kpi.trend.value}
-                  </span>
-                  <span className="ml-1">vs período anterior</span>
-                </div>
               </CardContent>
             </Card>
           )
@@ -233,17 +185,23 @@ export function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {priorityDistribution.map((item) => (
-              <div key={item.priority} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <PriorityBadge priority={item.priority} />
-                  <span className="text-sm">{item.count}</span>
+            {priorityWithPercentage.length > 0 ? (
+              priorityWithPercentage.map((item) => (
+                <div key={item.priority} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <PriorityBadge priority={item.priority} />
+                    <span className="text-sm">{item.count}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {item.percentage}%
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {item.percentage}%
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhum chamado cadastrado
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -260,18 +218,21 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-[200px] flex items-end justify-between gap-1">
-              {volumeData.map((day, index) => (
-                <div key={index} className="flex flex-col items-center gap-2 flex-1">
-                  <div 
-                    className="bg-primary rounded-t-sm w-full min-h-[4px]"
-                    style={{ height: `${(day.tickets / 20) * 100}%` }}
-                    title={`${day.date}: ${day.tickets} chamados`}
-                  />
-                  <span className="text-xs text-muted-foreground rotate-45 origin-center">
-                    {day.date}
-                  </span>
-                </div>
-              ))}
+              {data.volumeData.map((day, index) => {
+                const maxTickets = Math.max(...data.volumeData.map(d => d.tickets), 1)
+                return (
+                  <div key={index} className="flex flex-col items-center gap-2 flex-1">
+                    <div 
+                      className="bg-primary rounded-t-sm w-full min-h-[4px]"
+                      style={{ height: `${(day.tickets / maxTickets) * 100}%` }}
+                      title={`${day.date}: ${day.tickets} chamados`}
+                    />
+                    <span className="text-xs text-muted-foreground rotate-45 origin-center">
+                      {day.date}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>
@@ -288,24 +249,30 @@ export function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {topAssignees.map((assignee, index) => (
-              <div key={assignee.name} className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {assignee.avatar}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">
-                    {assignee.name}
+            {data.topAssignees.length > 0 ? (
+              data.topAssignees.map((assignee, index) => (
+                <div key={assignee.name} className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                    {assignee.avatar}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {assignee.count} chamados ativos
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">
+                      {assignee.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {assignee.count} chamados ativos
+                    </div>
                   </div>
+                  <Badge variant="secondary" className="text-xs">
+                    #{index + 1}
+                  </Badge>
                 </div>
-                <Badge variant="secondary" className="text-xs">
-                  #{index + 1}
-                </Badge>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhum chamado atribuído
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -329,29 +296,35 @@ export function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {urgentTickets.map((ticket) => (
-              <div key={ticket.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-sm font-medium">{ticket.id}</span>
-                    <StatusBadge status={ticket.status} />
-                    <PriorityBadge priority={ticket.priority} />
+            {data.urgentTickets.length > 0 ? (
+              data.urgentTickets.map((ticket) => (
+                <div key={ticket.id} className="flex items-center justify-between p-4 border rounded-lg bg-card">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-sm font-medium">{ticket.id}</span>
+                      <StatusBadge status={ticket.status} />
+                      <PriorityBadge priority={ticket.priority} />
+                    </div>
+                    <div className="text-sm font-medium truncate">{ticket.title}</div>
+                    <div className="text-xs text-muted-foreground">
+                      Solicitante: {ticket.requester}
+                    </div>
                   </div>
-                  <div className="text-sm font-medium truncate">{ticket.title}</div>
-                  <div className="text-xs text-muted-foreground">
-                    Solicitante: {ticket.requester}
+                  <div className="text-right">
+                    <Badge 
+                      variant={ticket.sla.includes("Atrasado") ? "destructive" : "secondary"}
+                      className="text-xs"
+                    >
+                      {ticket.sla}
+                    </Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge 
-                    variant={ticket.sla.includes("Atrasado") ? "destructive" : "secondary"}
-                    className="text-xs"
-                  >
-                    {ticket.sla}
-                  </Badge>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Nenhum chamado requer atenção no momento
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
