@@ -110,7 +110,7 @@ export default function Auth() {
                     id="signin-email"
                     name="signin-email"
                     type="text"
-                    placeholder="nome.sobrenome ou seu@email.com"
+                    placeholder="seu@email.com"
                     required
                   />
                 </div>
