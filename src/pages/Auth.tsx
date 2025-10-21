@@ -57,10 +57,13 @@ export default function Auth() {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const email = formData.get("signin-email") as string
+    let loginInput = formData.get("signin-email") as string
     const password = formData.get("signin-password") as string
 
     try {
+      // Se não contém @, é username (adicionar @sistema.interno)
+      const email = loginInput.includes('@') ? loginInput : `${loginInput}@sistema.interno`
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -102,12 +105,12 @@ export default function Auth() {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">Usuário ou Email</Label>
                   <Input
                     id="signin-email"
                     name="signin-email"
-                    type="email"
-                    placeholder="seu@email.com"
+                    type="text"
+                    placeholder="nome.sobrenome ou seu@email.com"
                     required
                   />
                 </div>

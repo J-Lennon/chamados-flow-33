@@ -41,9 +41,10 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
 
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@empresa.com`
+      const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`
+      const email = `${username}@sistema.interno`
       
-      console.log("Criando usuário:", { email, fullName, role })
+      console.log("Criando usuário:", { username, fullName, role })
       
       const redirectUrl = `${window.location.origin}/`
       
@@ -80,7 +81,8 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
 
       toast({
         title: "Usuário criado!",
-        description: `${fullName} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Login: ${email} | Senha: ${password}`,
+        description: `${fullName} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Login: ${username} | Senha: ${password}`,
+        duration: 10000,
       })
 
       setOpen(false)
@@ -113,7 +115,7 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
         <DialogHeader>
           <DialogTitle>Criar Novo Usuário</DialogTitle>
           <DialogDescription>
-            Adicione um novo usuário ao sistema. Um email de confirmação será enviado.
+            Adicione um novo usuário ao sistema. O login será nome.sobrenome
           </DialogDescription>
         </DialogHeader>
         
