@@ -28,8 +28,9 @@ interface CreateUserDialogProps {
 
 export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
   const [open, setOpen] = useState(false)
-  const [email, setEmail] = useState("")
-  const [name, setName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [password, setPassword] = useState("")
   const [role, setRole] = useState<"user" | "agent" | "admin">("user")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
@@ -39,20 +40,20 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
     setLoading(true)
 
     try {
-      console.log("Criando usuário:", { email, name, role })
+      const fullName = `${firstName.trim()} ${lastName.trim()}`
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@empresa.com`
       
-      // Generate temporary password
-      const tempPassword = Math.random().toString(36).slice(-8) + "Aa1!"
+      console.log("Criando usuário:", { email, fullName, role })
       
       const redirectUrl = `${window.location.origin}/`
       
       // Create user with signUp
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
-        password: tempPassword,
+        password: password,
         options: {
           data: {
-            full_name: name,
+            full_name: fullName,
           },
           emailRedirectTo: redirectUrl,
         },
@@ -79,12 +80,13 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
 
       toast({
         title: "Usuário criado!",
-        description: `${name} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Senha: ${tempPassword}`,
+        description: `${fullName} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Login: ${email} | Senha: ${password}`,
       })
 
       setOpen(false)
-      setEmail("")
-      setName("")
+      setFirstName("")
+      setLastName("")
+      setPassword("")
       setRole("user")
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error)
@@ -118,25 +120,37 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nome Completo</Label>
+              <Label htmlFor="firstName">Nome</Label>
               <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Digite o nome completo"
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Digite o nome"
                 required
               />
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="lastName">Sobrenome</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="usuario@empresa.com"
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Digite o sobrenome"
                 required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite a senha"
+                required
+                minLength={6}
               />
             </div>
             
