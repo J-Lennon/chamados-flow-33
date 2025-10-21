@@ -89,9 +89,6 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Create new user - admin only */}
-          {isAdmin && <CreateUserDialog />}
-          
           {/* Notifications */}
           <NotificationsPopover />
 
@@ -126,6 +123,19 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {isAdmin && (
+                <>
+                  <CreateUserDialog 
+                    trigger={
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Criar Usuário</span>
+                      </DropdownMenuItem>
+                    }
+                  />
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>
