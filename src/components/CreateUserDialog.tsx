@@ -23,11 +23,15 @@ import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 
 interface CreateUserDialogProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   trigger?: React.ReactNode
 }
 
-export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
-  const [open, setOpen] = useState(false)
+export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }: CreateUserDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = onOpenChange || setInternalOpen
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [password, setPassword] = useState("")
@@ -104,13 +108,7 @@ export function CreateUserDialog({ trigger }: CreateUserDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="ghost" size="icon" title="Criar novo usuário">
-            <UserPlus className="h-4 w-4" />
-          </Button>
-        )}
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Criar Novo Usuário</DialogTitle>

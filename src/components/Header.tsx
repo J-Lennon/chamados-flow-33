@@ -27,6 +27,7 @@ export function Header() {
   const { toast } = useToast()
   const [profile, setProfile] = useState<{ full_name: string; avatar_url?: string } | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [createUserOpen, setCreateUserOpen] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -125,14 +126,10 @@ export function Header() {
               <DropdownMenuSeparator />
               {isAdmin && (
                 <>
-                  <CreateUserDialog 
-                    trigger={
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Criar Usuário</span>
-                      </DropdownMenuItem>
-                    }
-                  />
+                  <DropdownMenuItem onClick={() => setCreateUserOpen(true)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Criar Usuário</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
               )}
@@ -151,13 +148,22 @@ export function Header() {
       </div>
 
       {user && profile && (
-        <ProfileSettingsDialog
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          currentName={profile.full_name}
-          currentAvatar={profile.avatar_url}
-          userId={user.id}
-        />
+        <>
+          <ProfileSettingsDialog
+            open={settingsOpen}
+            onOpenChange={setSettingsOpen}
+            currentName={profile.full_name}
+            currentAvatar={profile.avatar_url}
+            userId={user.id}
+          />
+          
+          {isAdmin && (
+            <CreateUserDialog 
+              open={createUserOpen}
+              onOpenChange={setCreateUserOpen}
+            />
+          )}
+        </>
       )}
     </header>
   )
