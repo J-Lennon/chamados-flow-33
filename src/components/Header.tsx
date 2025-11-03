@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Moon, Sun, User, Settings, LogOut } from "lucide-react"
+import { Search, Moon, Sun, User, Settings, LogOut, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -93,6 +93,18 @@ export function Header() {
           {/* Notifications */}
           <NotificationsPopover />
 
+          {/* Create User - Only for admins */}
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCreateUserOpen(true)}
+              title="Criar usuário comum"
+            >
+              <UserPlus className="h-4 w-4" />
+            </Button>
+          )}
+
           {/* Theme toggle */}
           <Button
             variant="ghost"
@@ -124,15 +136,6 @@ export function Header() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {isAdmin && (
-                <>
-                  <DropdownMenuItem onClick={() => setCreateUserOpen(true)}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Criar Usuário</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
               <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>

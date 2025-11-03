@@ -35,7 +35,6 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState<"user" | "agent" | "admin">("user")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -48,7 +47,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`
       const email = `${username}@sistema.interno`
       
-      console.log("Criando usuário:", { username, fullName, role })
+      console.log("Criando usuário:", { username, fullName })
       
       const redirectUrl = `${window.location.origin}/`
       
@@ -67,25 +66,9 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       if (signUpError) throw signUpError
       if (!authData.user) throw new Error("Failed to create user")
 
-      // Wait for trigger to create profile and default role
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Update role if not 'user' (default from trigger)
-      if (role !== "user") {
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .update({ role: role })
-          .eq("user_id", authData.user.id)
-
-        if (roleError) {
-          console.error("Error updating role:", roleError)
-          throw roleError
-        }
-      }
-
       toast({
         title: "Usuário criado!",
-        description: `${fullName} foi adicionado como ${role === "admin" ? "Administrador" : role === "agent" ? "Agente" : "Usuário"}. Login: ${username} | Senha: ${password}`,
+        description: `${fullName} foi criado. Login: ${username} | Senha: ${password}`,
         duration: 10000,
       })
 
@@ -93,7 +76,6 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       setFirstName("")
       setLastName("")
       setPassword("")
-      setRole("user")
     } catch (error: any) {
       console.error("Erro ao criar usuário:", error)
       toast({
@@ -111,9 +93,9 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Criar Novo Usuário</DialogTitle>
+          <DialogTitle>Criar Usuário Comum</DialogTitle>
           <DialogDescription>
-            Adicione um novo usuário ao sistema. O login será nome.sobrenome
+            Crie um usuário que poderá abrir chamados. O login será nome.sobrenome
           </DialogDescription>
         </DialogHeader>
         
@@ -152,20 +134,6 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
                 required
                 minLength={6}
               />
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="role">Tipo de Usuário</Label>
-              <Select value={role} onValueChange={(value: any) => setRole(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">Usuário</SelectItem>
-                  <SelectItem value="agent">Agente</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           
