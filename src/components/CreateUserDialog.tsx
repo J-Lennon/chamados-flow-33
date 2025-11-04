@@ -43,44 +43,49 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
     setLoading(true)
 
     try {
-      const fullName = `${firstName.trim()} ${lastName.trim()}`
-      const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`
-      const email = `${username}@sistema.interno`
-      
-      console.log("Criando usuário:", { username, fullName })
-      
-      const redirectUrl = `${window.location.origin}/`
-      
-      // Create user with signUp
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password: password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: redirectUrl,
-        },
-      })
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
 
-      if (signUpError) throw signUpError
-      if (!authData.user) throw new Error("Failed to create user")
+      const response = await fetch(
+        'https://njzmgqbqzzakzbjprdbl.supabase.co/functions/v1/manage-user',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'create',
+            userData: {
+              firstName,
+              lastName,
+              password
+            }
+          })
+        }
+      )
+
+      const result = await response.json()
+      
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Erro ao criar usuário')
+      }
 
       toast({
-        title: "Usuário criado!",
-        description: `${fullName} foi criado. Login: ${username} | Senha: ${password}`,
+        title: "Usuário criado com sucesso!",
+        description: `Login: ${result.credentials.username} | Senha: ${password}`,
         duration: 10000,
       })
 
-      setOpen(false)
       setFirstName("")
       setLastName("")
       setPassword("")
+      setOpen(false)
     } catch (error: any) {
-      console.error("Erro ao criar usuário:", error)
+      console.error("Error creating user:", error)
       toast({
         title: "Erro ao criar usuário",
-        description: error.message || "Tente novamente",
+        description: error.message,
         variant: "destructive",
       })
     } finally {

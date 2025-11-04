@@ -113,24 +113,32 @@ export function UsersManagement() {
     try {
       setUpdating(true)
 
-      // Update profile name if changed
-      if (newName !== editUser.full_name) {
-        const { error: nameError } = await supabase
-          .from("profiles")
-          .update({ full_name: newName })
-          .eq("id", editUser.id)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
 
-        if (nameError) throw nameError
-      }
+      const response = await fetch(
+        'https://njzmgqbqzzakzbjprdbl.supabase.co/functions/v1/manage-user',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'update',
+            userData: {
+              userId: editUser.id,
+              fullName: newName !== editUser.full_name ? newName : undefined,
+              password: newPassword || undefined
+            }
+          })
+        }
+      )
 
-      // Update password if provided
-      if (newPassword) {
-        const { error: passwordError } = await supabase.auth.admin.updateUserById(
-          editUser.id,
-          { password: newPassword }
-        )
-
-        if (passwordError) throw passwordError
+      const result = await response.json()
+      
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Erro ao atualizar usuário')
       }
 
       toast({
@@ -158,9 +166,31 @@ export function UsersManagement() {
     if (!deleteUser) return
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(deleteUser.id)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('No session')
 
-      if (error) throw error
+      const response = await fetch(
+        'https://njzmgqbqzzakzbjprdbl.supabase.co/functions/v1/manage-user',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'delete',
+            userData: {
+              userId: deleteUser.id
+            }
+          })
+        }
+      )
+
+      const result = await response.json()
+      
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Erro ao excluir usuário')
+      }
 
       toast({
         title: "Usuário excluído!",
