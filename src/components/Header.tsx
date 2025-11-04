@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { Search, Moon, Sun, User, Settings, LogOut, UserPlus } from "lucide-react"
+import { Search, Moon, Sun, User, Settings, LogOut, UserPlus, Users } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -25,6 +26,7 @@ export function Header() {
   const { user } = useAuth()
   const { isAdmin } = useUserRole(user?.id)
   const { toast } = useToast()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<{ full_name: string; avatar_url?: string } | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
@@ -93,16 +95,27 @@ export function Header() {
           {/* Notifications */}
           <NotificationsPopover />
 
-          {/* Create User - Only for admins */}
+          {/* Admin Actions - Only for admins */}
           {isAdmin && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCreateUserOpen(true)}
-              title="Criar usuário comum"
-            >
-              <UserPlus className="h-4 w-4" />
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCreateUserOpen(true)}
+                title="Criar usuário comum"
+              >
+                <UserPlus className="h-4 w-4" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/users")}
+                title="Ver todos os usuários"
+              >
+                <Users className="h-4 w-4" />
+              </Button>
+            </>
           )}
 
           {/* Theme toggle */}

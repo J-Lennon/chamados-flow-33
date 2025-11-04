@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { User } from "@supabase/supabase-js"
 import { supabase } from "@/integrations/supabase/client"
 import { Header } from "@/components/Header"
@@ -9,14 +9,12 @@ import { TicketDetails } from "@/components/TicketDetails"
 import { TicketFilters } from "@/components/TicketFilters"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Ticket } from "@/hooks/useTickets"
-import { useUserRole } from "@/hooks/useUserRole"
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null)
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const navigate = useNavigate()
-  const { isAdmin } = useUserRole(user?.id)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -54,11 +52,6 @@ const Index = () => {
           <TabsList>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="tickets">Chamados</TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="users" asChild>
-                <Link to="/users">Usuários</Link>
-              </TabsTrigger>
-            )}
           </TabsList>
           
           <TabsContent value="dashboard">
