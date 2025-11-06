@@ -35,6 +35,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState<"user" | "agent">("user")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -59,7 +60,8 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
             userData: {
               firstName,
               lastName,
-              password
+              password,
+              role
             }
           })
         }
@@ -80,6 +82,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       setFirstName("")
       setLastName("")
       setPassword("")
+      setRole("user")
       setOpen(false)
     } catch (error: any) {
       console.error("Error creating user:", error)
@@ -98,9 +101,9 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Criar Usuário Comum</DialogTitle>
+          <DialogTitle>Criar Novo Usuário</DialogTitle>
           <DialogDescription>
-            Crie um usuário que poderá abrir chamados. O login será nome.sobrenome
+            Defina as permissões do usuário. O login será nome.sobrenome
           </DialogDescription>
         </DialogHeader>
         
@@ -139,6 +142,19 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
                 required
                 minLength={6}
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="role">Permissão</Label>
+              <Select value={role} onValueChange={(value: "user" | "agent") => setRole(value)}>
+                <SelectTrigger id="role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Usuário Comum (apenas abre chamados)</SelectItem>
+                  <SelectItem value="agent">Suporte (gerencia chamados e usuários)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           

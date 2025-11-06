@@ -47,7 +47,7 @@ serve(async (req) => {
 
     switch (action) {
       case 'create': {
-        const { firstName, lastName, password } = userData
+        const { firstName, lastName, password, role = 'user' } = userData
         const username = `${firstName}.${lastName}`.toLowerCase()
         const email = `${username}@telesdesk.com`
         const fullName = `${firstName} ${lastName}`
@@ -62,6 +62,19 @@ serve(async (req) => {
         })
 
         if (createError) throw createError
+
+        // Atribuir role ao usuário
+        const { error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .insert({
+            user_id: newUser.user.id,
+            role: role
+          })
+
+        if (roleError) {
+          console.error('Error assigning role:', roleError)
+          // Não falhar a criação do usuário se houver erro ao atribuir role
+        }
 
         return new Response(
           JSON.stringify({ 
