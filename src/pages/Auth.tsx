@@ -61,11 +61,11 @@ export default function Auth() {
     const password = formData.get("signin-password") as string
 
     try {
-      // Se não contém @, é username (adicionar @sistema.interno)
-      const email = loginInput.includes('@') ? loginInput : `${loginInput}@sistema.interno`
+      // Se não contém @, é username (adicionar @telesdesk.com)
+      const email = loginInput.includes('@') ? loginInput : `${loginInput.toLowerCase()}@telesdesk.com`
       
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.toLowerCase(),
         password,
       })
 
