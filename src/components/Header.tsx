@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Search, Moon, Sun, User, Settings, LogOut, UserPlus, Users } from "lucide-react"
+import { Search, Moon, Sun, User, Settings, LogOut, UserPlus, Users, Plus } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useTheme } from "next-themes"
 import { CreateUserDialog } from "./CreateUserDialog"
+import { CreateTicketDialog } from "./CreateTicketDialog"
 import { NotificationsPopover } from "./NotificationsPopover"
 import { ProfileSettingsDialog } from "./ProfileSettingsDialog"
 import { useAuth } from "@/hooks/useAuth"
@@ -30,6 +31,7 @@ export function Header() {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url?: string } | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [createUserOpen, setCreateUserOpen] = useState(false)
+  const [createTicketOpen, setCreateTicketOpen] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -92,6 +94,16 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Create Ticket - Available for all users */}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setCreateTicketOpen(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Chamado
+          </Button>
+
           {/* Notifications */}
           <NotificationsPopover />
 
@@ -171,6 +183,11 @@ export function Header() {
             currentName={profile.full_name}
             currentAvatar={profile.avatar_url}
             userId={user.id}
+          />
+          
+          <CreateTicketDialog
+            open={createTicketOpen}
+            onOpenChange={setCreateTicketOpen}
           />
           
           {isAdmin && (
