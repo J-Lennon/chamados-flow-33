@@ -63,8 +63,22 @@ const Index = () => {
           )}
           
           <TabsContent value="tickets" className="space-y-4">
-            <TicketFilters onFiltersChange={() => {}} />
-            <TicketsList onTicketSelect={handleTicketSelect} />
+            <Tabs defaultValue="active" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="active">Chamados Ativos</TabsTrigger>
+                <TabsTrigger value="completed">Chamados Concluídos</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="active">
+                <TicketFilters onFiltersChange={() => {}} />
+                <TicketsList onTicketSelect={handleTicketSelect} statusFilter="active" />
+              </TabsContent>
+              
+              <TabsContent value="completed">
+                <TicketFilters onFiltersChange={() => {}} />
+                <TicketsList onTicketSelect={handleTicketSelect} statusFilter="completed" />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </main>

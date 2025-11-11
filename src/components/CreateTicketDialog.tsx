@@ -105,14 +105,7 @@ export function CreateTicketDialog({
 
   return (
     <Dialog open={isControlled ? open : isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Chamado
-          </Button>
-        )}
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>Novo Chamado</DialogTitle>

@@ -22,21 +22,29 @@ export interface Ticket {
   }
 }
 
-export function useTickets() {
+export function useTickets(statusFilter?: 'active' | 'completed') {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
   const fetchTickets = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("tickets")
         .select(`
           *,
           requester:profiles!tickets_requester_id_fkey(full_name),
           assignee:profiles!tickets_assigned_to_fkey(full_name)
         `)
-        .order("created_at", { ascending: false })
+
+      // Aplicar filtro de status
+      if (statusFilter === 'active') {
+        query = query.in('status', ['new', 'progress', 'waiting', 'accepted'])
+      } else if (statusFilter === 'completed') {
+        query = query.in('status', ['completed', 'closed', 'rejected'])
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: false })
 
       if (error) throw error
       setTickets(data || [])
@@ -191,7 +199,7 @@ export function useTickets() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [statusFilter])
 
   return {
     tickets,

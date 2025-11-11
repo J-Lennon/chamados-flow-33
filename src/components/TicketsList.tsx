@@ -26,11 +26,12 @@ export type { Ticket }
 
 interface TicketsListProps {
   onTicketSelect?: (ticket: Ticket) => void
+  statusFilter?: 'active' | 'completed'
 }
 
-export function TicketsList({ onTicketSelect }: TicketsListProps) {
+export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) {
   const [selectedTickets, setSelectedTickets] = useState<string[]>([])
-  const { tickets, loading } = useTickets()
+  const { tickets, loading } = useTickets(statusFilter)
 
   const toggleTicketSelection = (ticketId: string) => {
     setSelectedTickets(prev => 
