@@ -39,6 +39,19 @@ interface DashboardData {
     date: string
     tickets: number
   }>
+  agentPerformance: Array<{
+    name: string
+    avatar: string
+    completedTickets: number
+    avgResolutionTime: string
+    slaCompliance: number
+  }>
+  teamMetrics: {
+    avgResolutionTime: string
+    slaComplianceRate: number
+    totalResolved: number
+    activeTickets: number
+  }
 }
 
 export function useDashboardData() {
@@ -48,12 +61,34 @@ export function useDashboardData() {
     priorityDistribution: { critical: 0, high: 0, medium: 0, low: 0 },
     urgentTickets: [],
     topAssignees: [],
-    volumeData: []
+    volumeData: [],
+    agentPerformance: [],
+    teamMetrics: { avgResolutionTime: "0h", slaComplianceRate: 0, totalResolved: 0, activeTickets: 0 }
   })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchDashboardData()
+
+    // Subscribe to ticket changes for real-time updates
+    const channel = supabase
+      .channel("dashboard-tickets-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tickets",
+        },
+        () => {
+          fetchDashboardData()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const fetchDashboardData = async () => {
@@ -76,7 +111,9 @@ export function useDashboardData() {
           priorityDistribution: { critical: 0, high: 0, medium: 0, low: 0 },
           urgentTickets: [],
           topAssignees: [],
-          volumeData: []
+          volumeData: [],
+          agentPerformance: [],
+          teamMetrics: { avgResolutionTime: "0h", slaComplianceRate: 0, totalResolved: 0, activeTickets: 0 }
         })
         setLoading(false)
         return
@@ -176,13 +213,93 @@ export function useDashboardData() {
         }
       })
 
+      // Agent performance metrics
+      const completedTickets = tickets.filter(t => t.status === "completed")
+      const agentStats = completedTickets
+        .filter(t => t.assigned_to)
+        .reduce((acc, t) => {
+          const agentName = t.assignee?.full_name || "Sem nome"
+          if (!acc[agentName]) {
+            acc[agentName] = {
+              tickets: [],
+              slaCompliant: 0
+            }
+          }
+          acc[agentName].tickets.push(t)
+          
+          // Check SLA compliance
+          if (t.sla_due_date) {
+            const completedDate = new Date(t.updated_at)
+            const slaDate = new Date(t.sla_due_date)
+            if (completedDate <= slaDate) {
+              acc[agentName].slaCompliant++
+            }
+          }
+          return acc
+        }, {} as Record<string, { tickets: any[], slaCompliant: number }>)
+
+      const agentPerformance = Object.entries(agentStats)
+        .map(([name, stats]) => {
+          // Calculate average resolution time
+          const totalHours = stats.tickets.reduce((sum, t) => {
+            const created = new Date(t.created_at).getTime()
+            const completed = new Date(t.updated_at).getTime()
+            return sum + (completed - created) / (1000 * 60 * 60)
+          }, 0)
+          const avgHours = Math.round(totalHours / stats.tickets.length)
+          
+          return {
+            name,
+            avatar: name.split(" ").map(n => n[0]).join("").toUpperCase(),
+            completedTickets: stats.tickets.length,
+            avgResolutionTime: avgHours < 24 ? `${avgHours}h` : `${Math.round(avgHours / 24)}d`,
+            slaCompliance: Math.round((stats.slaCompliant / stats.tickets.length) * 100)
+          }
+        })
+        .sort((a, b) => b.completedTickets - a.completedTickets)
+        .slice(0, 5)
+
+      // Team metrics
+      const totalResolved = completedTickets.length
+      const activeTickets = tickets.filter(t => t.status !== "completed" && t.status !== "rejected").length
+      
+      let avgResolutionHours = 0
+      let slaCompliantCount = 0
+      
+      if (completedTickets.length > 0) {
+        const totalHours = completedTickets.reduce((sum, t) => {
+          const created = new Date(t.created_at).getTime()
+          const completed = new Date(t.updated_at).getTime()
+          
+          // Check SLA
+          if (t.sla_due_date) {
+            const slaDate = new Date(t.sla_due_date)
+            if (completed <= slaDate.getTime()) {
+              slaCompliantCount++
+            }
+          }
+          
+          return sum + (completed - created) / (1000 * 60 * 60)
+        }, 0)
+        avgResolutionHours = Math.round(totalHours / completedTickets.length)
+      }
+
+      const teamMetrics = {
+        avgResolutionTime: avgResolutionHours < 24 ? `${avgResolutionHours}h` : `${Math.round(avgResolutionHours / 24)}d`,
+        slaComplianceRate: completedTickets.length > 0 ? Math.round((slaCompliantCount / completedTickets.length) * 100) : 0,
+        totalResolved,
+        activeTickets
+      }
+
       setData({
         kpiData,
         statusQueue,
         priorityDistribution,
         urgentTickets,
         topAssignees,
-        volumeData
+        volumeData,
+        agentPerformance,
+        teamMetrics
       })
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
