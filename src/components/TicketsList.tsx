@@ -56,16 +56,15 @@ export function TicketsList({ onTicketSelect }: TicketsListProps) {
     const slaDate = new Date(sla)
     const now = new Date()
     const timeLeft = slaDate.getTime() - now.getTime()
-    const hoursLeft = timeLeft / (1000 * 60 * 60)
+    const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24))
 
-    if (hoursLeft < 0) {
+    if (daysLeft < 0) {
       return { text: "Atrasado", variant: "destructive" as const }
-    } else if (hoursLeft < 4) {
-      return { text: `${Math.floor(hoursLeft)}h restantes`, variant: "destructive" as const }
-    } else if (hoursLeft < 24) {
-      return { text: `${Math.floor(hoursLeft)}h restantes`, variant: "secondary" as const }
+    } else if (daysLeft <= 4) {
+      return { text: `${daysLeft}d - Em dia`, variant: "outline" as const }
+    } else if (daysLeft <= 9) {
+      return { text: `${daysLeft}d - Próximo`, variant: "secondary" as const }
     } else {
-      const daysLeft = Math.floor(hoursLeft / 24)
       return { text: `${daysLeft}d restantes`, variant: "outline" as const }
     }
   }

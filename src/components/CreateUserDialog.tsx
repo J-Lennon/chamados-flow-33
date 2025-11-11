@@ -35,7 +35,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState<"user" | "agent">("user")
+  const [role, setRole] = useState<"user" | "agent" | "admin">("user")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -146,13 +146,14 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
 
             <div className="grid gap-2">
               <Label htmlFor="role">Permissão</Label>
-              <Select value={role} onValueChange={(value: "user" | "agent") => setRole(value)}>
+              <Select value={role} onValueChange={(value: "user" | "agent" | "admin") => setRole(value)}>
                 <SelectTrigger id="role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">Usuário Comum (apenas abre chamados)</SelectItem>
-                  <SelectItem value="agent">Suporte (gerencia chamados e usuários)</SelectItem>
+                  <SelectItem value="user">Usuário Comum (apenas abre e visualiza chamados)</SelectItem>
+                  <SelectItem value="agent">Suporte (gerencia chamados e usuários, sem dashboard)</SelectItem>
+                  <SelectItem value="admin">Administrador (acesso total)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
