@@ -133,7 +133,7 @@ export type Database = {
           description: string
           id: string
           priority: string | null
-          requester_id: string
+          requester_id: string | null
           sla_due_date: string | null
           status: string | null
           title: string
@@ -146,7 +146,7 @@ export type Database = {
           description: string
           id?: string
           priority?: string | null
-          requester_id: string
+          requester_id?: string | null
           sla_due_date?: string | null
           status?: string | null
           title: string
@@ -159,7 +159,7 @@ export type Database = {
           description?: string
           id?: string
           priority?: string | null
-          requester_id?: string
+          requester_id?: string | null
           sla_due_date?: string | null
           status?: string | null
           title?: string
