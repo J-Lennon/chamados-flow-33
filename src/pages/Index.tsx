@@ -46,14 +46,14 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       <Header />
       
       <main className="container mx-auto p-6">
         <Tabs defaultValue={isAdmin ? "dashboard" : "tickets"} className="space-y-6">
-          <TabsList>
-            {isAdmin && <TabsTrigger value="dashboard">Dashboard</TabsTrigger>}
-            <TabsTrigger value="tickets">Chamados</TabsTrigger>
+          <TabsList className="bg-card/50 backdrop-blur-sm border border-primary/20">
+            {isAdmin && <TabsTrigger value="dashboard" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground">Dashboard</TabsTrigger>}
+            <TabsTrigger value="tickets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground">Chamados</TabsTrigger>
           </TabsList>
           
           {isAdmin && (
@@ -64,9 +64,9 @@ const Index = () => {
           
           <TabsContent value="tickets" className="space-y-4">
             <Tabs defaultValue="active" className="space-y-4">
-              <TabsList>
-                <TabsTrigger value="active">Chamados Ativos</TabsTrigger>
-                <TabsTrigger value="completed">Chamados Concluídos</TabsTrigger>
+              <TabsList className="bg-card/50 backdrop-blur-sm border border-primary/20">
+                <TabsTrigger value="active" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground">Chamados Ativos</TabsTrigger>
+                <TabsTrigger value="completed" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80 data-[state=active]:text-primary-foreground">Chamados Concluídos</TabsTrigger>
               </TabsList>
               
               <TabsContent value="active">

@@ -72,22 +72,32 @@ export function Header() {
     .toUpperCase() || "U"
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-lg shadow-primary/5">
       <div className="container flex h-16 items-center gap-4">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold">
-            Telesdesk
+        {/* Logo - Clickable */}
+        <button 
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 group hover:scale-105 transition-all duration-300"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/50 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
+            <div className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground px-3 py-1.5 rounded-lg font-bold text-xl tracking-tight shadow-lg">
+              TD
+            </div>
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            TeleDesk
           </span>
-        </div>
+        </button>
 
         {/* Search */}
         <div className="flex-1 max-w-lg">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-hover:text-primary transition-colors" />
             <Input
               placeholder="Buscar chamados, solicitantes..."
-              className="pl-10"
+              className="pl-10 bg-muted/50 border-primary/20 hover:border-primary/40 focus:border-primary transition-all"
             />
           </div>
         </div>
@@ -99,6 +109,7 @@ export function Header() {
             variant="default"
             size="sm"
             onClick={() => setCreateTicketOpen(true)}
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all hover:scale-105"
           >
             <Plus className="mr-2 h-4 w-4" />
             Novo Chamado

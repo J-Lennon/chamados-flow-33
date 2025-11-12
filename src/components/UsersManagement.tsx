@@ -32,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Edit, Trash2, Loader2 } from "lucide-react"
+import { Edit, Trash2, Loader2, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface UserProfile {
@@ -224,17 +224,24 @@ export function UsersManagement() {
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Usuários da Plataforma</CardTitle>
-          <CardDescription>
-            Gerencie todos os usuários cadastrados no sistema
-          </CardDescription>
+      <Card className="border-primary/20 shadow-lg backdrop-blur-sm bg-card/50">
+        <CardHeader className="border-b border-primary/10">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-primary to-primary/70 rounded-lg">
+              <Users className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Usuários da Plataforma</CardTitle>
+              <CardDescription>
+                Gerencie todos os usuários cadastrados no sistema
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {loading ? (
             <div className="flex justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <Table>
