@@ -70,6 +70,7 @@ export function CreateTicketDialog({
         title,
         description,
         priority,
+        city,
         department,
         requester_id: user.id,
         status: "new",
