@@ -41,6 +41,7 @@ export function CreateTicketDialog({
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState("medium")
+  const [city, setCity] = useState("")
   const [department, setDepartment] = useState("")
   const { toast } = useToast()
 
@@ -85,6 +86,7 @@ export function CreateTicketDialog({
       setTitle("")
       setDescription("")
       setPriority("medium")
+      setCity("")
       setDepartment("")
       
       handleOpenChange(false)
@@ -137,6 +139,19 @@ export function CreateTicketDialog({
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Select value={city} onValueChange={setCity} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a cidade" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pelotas">Pelotas</SelectItem>
+                  <SelectItem value="Rio Grande">Rio Grande</SelectItem>
+                  <SelectItem value="Porto Alegre">Porto Alegre</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="department">Departamento</Label>
               <Input
                 id="department"
@@ -155,7 +170,7 @@ export function CreateTicketDialog({
                   <SelectItem value="low">Baixa</SelectItem>
                   <SelectItem value="medium">Média</SelectItem>
                   <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
+                  <SelectItem value="critical">Crítica</SelectItem>
                 </SelectContent>
               </Select>
             </div>

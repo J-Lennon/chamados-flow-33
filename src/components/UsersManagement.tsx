@@ -44,7 +44,7 @@ interface UserProfile {
 
 export function UsersManagement() {
   const { user } = useAuth()
-  const { isAdmin } = useUserRole(user?.id)
+  const { isAdmin, isAgent } = useUserRole(user?.id)
   const { toast } = useToast()
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,10 +55,10 @@ export function UsersManagement() {
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
-    if (isAdmin) {
+    if (isAdmin || isAgent) {
       fetchUsers()
     }
-  }, [isAdmin])
+  }, [isAdmin, isAgent])
 
   const fetchUsers = async () => {
     try {
@@ -209,7 +209,7 @@ export function UsersManagement() {
     }
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !isAgent) {
     return (
       <Card>
         <CardHeader>
