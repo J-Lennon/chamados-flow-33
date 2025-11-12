@@ -2,13 +2,6 @@ import { useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
 import {
@@ -160,7 +153,7 @@ export function Dashboard() {
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold">
             Dashboard Executivo
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -168,23 +161,10 @@ export function Dashboard() {
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <Select defaultValue="30">
-            <SelectTrigger className="w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Últimos 7 dias</SelectItem>
-              <SelectItem value="14">Últimos 14 dias</SelectItem>
-              <SelectItem value="30">Últimos 30 dias</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button variant="default" size="sm" onClick={handleExportPDF}>
-            <Download className="mr-2 h-4 w-4" />
-            Exportar PDF
-          </Button>
-        </div>
+        <Button variant="default" size="sm" onClick={handleExportPDF}>
+          <Download className="mr-2 h-4 w-4" />
+          Exportar PDF
+        </Button>
       </div>
 
       {/* Team Performance Metrics */}
