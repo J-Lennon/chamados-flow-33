@@ -31,7 +31,7 @@ interface PriorityBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status]
+  const config = statusConfig[status] || statusConfig.new
   
   return (
     <Badge className={cn(config.className, className)}>
@@ -41,7 +41,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
 }
 
 export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
-  const config = priorityConfig[priority]
+  const config = priorityConfig[priority] || priorityConfig.medium
   
   return (
     <Badge variant="outline" className={cn(config.className, "border-current", className)}>
