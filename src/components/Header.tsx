@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast"
 export function Header() {
   const { theme, setTheme } = useTheme()
   const { user } = useAuth()
-  const { isAdmin } = useUserRole(user?.id)
+  const { isAdmin, isAgent } = useUserRole(user?.id)
   const { toast } = useToast()
   const navigate = useNavigate()
   const [profile, setProfile] = useState<{ full_name: string; avatar_url?: string } | null>(null)
@@ -118,14 +118,14 @@ export function Header() {
           {/* Notifications */}
           <NotificationsPopover />
 
-          {/* Admin Actions - Only for admins */}
-          {isAdmin && (
+          {/* Admin and Agent Actions - Create users and manage */}
+          {(isAdmin || isAgent) && (
             <>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setCreateUserOpen(true)}
-                title="Criar usuário comum"
+                title="Criar usuário"
               >
                 <UserPlus className="h-4 w-4" />
               </Button>
