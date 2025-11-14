@@ -150,19 +150,23 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6" ref={dashboardRef}>
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">
+      {/* Header with Export */}
+      <div className="flex items-center justify-between p-6 rounded-xl bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 backdrop-blur-sm">
+        <div className="space-y-2">
+          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
             Dashboard Executivo
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Visão estratégica e análise de performance da equipe
+          </h2>
+          <p className="text-muted-foreground flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary animate-pulse-glow" />
+            Visão estratégica e análise de performance da equipe em tempo real
           </p>
         </div>
-        
-        <Button variant="default" size="sm" onClick={handleExportPDF}>
-          <Download className="mr-2 h-4 w-4" />
+        <Button 
+          onClick={handleExportPDF} 
+          variant="outline" 
+          className="gap-2 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30 hover:border-primary/50 hover:shadow-glow transition-all"
+        >
+          <Download className="h-4 w-4" />
           Exportar PDF
         </Button>
       </div>
@@ -225,24 +229,34 @@ export function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {kpiData.map((kpi) => {
+        {kpiData.map((kpi, index) => {
           const Icon = kpi.icon
-          
           return (
-            <Card key={kpi.title} className="relative overflow-hidden hover:shadow-lg transition-shadow">
-              <div className={`absolute inset-0 ${kpi.bgColor} opacity-50`} />
-              <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+            <Card 
+              key={index} 
+              className="relative border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow hover:border-primary/50 transition-all duration-300 overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   {kpi.title}
                 </CardTitle>
-                <Icon className={`h-5 w-5 ${kpi.color}`} />
+                <div className={`p-2 rounded-lg ${kpi.bgColor} group-hover:shadow-neon transition-shadow`}>
+                  <Icon className={`h-4 w-4 ${kpi.color}`} />
+                </div>
               </CardHeader>
-              <CardContent className="relative">
-                <div className="text-2xl font-bold">{kpi.value}</div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <TrendingUp className="h-3 w-3" />
-                  {kpi.trend} vs mês anterior
-                </p>
+              <CardContent className="relative z-10">
+                <div className="flex items-baseline justify-between">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                    {kpi.value}
+                  </div>
+                  <Badge 
+                    variant="secondary" 
+                    className="text-xs bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/30"
+                  >
+                    {kpi.trend}
+                  </Badge>
+                </div>
               </CardContent>
             </Card>
           )
@@ -307,16 +321,18 @@ export function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Status Queue */}
-        <Card className="lg:col-span-2 border-2">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
+        <Card className="lg:col-span-2 border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow transition-all">
+          <CardHeader className="bg-gradient-to-r from-primary/20 via-secondary/10 to-transparent border-b border-primary/20">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10 animate-pulse-glow">
                 <BarChart3 className="h-5 w-5 text-primary" />
-                Fila por Status
-              </CardTitle>
-              <CardDescription>
-                Distribuição de chamados por status atual
-              </CardDescription>
+              </div>
+              <div>
+                <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Fila por Status
+                </CardTitle>
+                <CardDescription>Distribuição de chamados por status atual</CardDescription>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -338,15 +354,19 @@ export function Dashboard() {
         </Card>
 
         {/* Priority Distribution */}
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5 text-primary" />
-              Prioridades
-            </CardTitle>
-            <CardDescription>
-              Distribuição por nível de prioridade
-            </CardDescription>
+        <Card className="border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow transition-all">
+          <CardHeader className="bg-gradient-to-r from-secondary/20 via-accent/10 to-transparent border-b border-primary/20">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-secondary/10 animate-pulse-glow">
+                <PieChart className="h-5 w-5 text-secondary" />
+              </div>
+              <div>
+                <CardTitle className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
+                  Prioridades
+                </CardTitle>
+                <CardDescription>Distribuição por nível de prioridade</CardDescription>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {priorityWithPercentage.length > 0 ? (

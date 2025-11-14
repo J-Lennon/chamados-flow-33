@@ -16,8 +16,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
-import { MoreHorizontal, Eye } from "lucide-react"
+import { MoreHorizontal, Eye, Info } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { Ticket, useTickets } from "@/hooks/useTickets"
@@ -104,7 +110,22 @@ export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) 
               <TableHead>Status</TableHead>
               <TableHead>Prioridade</TableHead>
               <TableHead>Responsável</TableHead>
-              <TableHead>SLA</TableHead>
+              <TableHead>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="flex items-center gap-1 cursor-help">
+                      SLA
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">
+                        <strong>SLA</strong> (Service Level Agreement) é o prazo acordado para resolução do chamado.
+                        Indica quanto tempo resta até o vencimento.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead>Atualizado</TableHead>
               <TableHead className="w-[70px]">Ações</TableHead>
             </TableRow>

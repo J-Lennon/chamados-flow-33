@@ -8,68 +8,75 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 217 33% 17%;
+    --background: 220 26% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 217 33% 17%;
+    --card: 220 26% 6%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 217 33% 17%;
+    --popover: 220 26% 6%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 217 91% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 217 91% 70%;
 
-    --secondary: 217 19% 27%;
+    --secondary: 280 65% 55%;
     --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 280 65% 70%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 26% 10%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 95%;
-    --accent-foreground: 217 91% 25%;
+    --accent: 180 80% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 180 80% 60%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --border: 217 33% 15%;
+    --input: 220 26% 10%;
+    --ring: 217 91% 55%;
 
-    /* Status colors */
-    --status-new: 217 91% 60%;
+    /* Status colors - Neon tech style */
+    --status-new: 217 91% 55%;
     --status-new-foreground: 0 0% 100%;
-    --status-progress: 45 93% 47%;
+    --status-progress: 45 93% 52%;
     --status-progress-foreground: 0 0% 100%;
     --status-waiting: 280 85% 60%;
     --status-waiting-foreground: 0 0% 100%;
-    --status-accepted: 160 84% 39%;
+    --status-accepted: 160 84% 45%;
     --status-accepted-foreground: 0 0% 100%;
-    --status-completed: 142 76% 36%;
+    --status-completed: 142 76% 42%;
     --status-completed-foreground: 0 0% 100%;
     --status-overdue: 0 84% 60%;
     --status-overdue-foreground: 0 0% 100%;
 
-    /* Priority colors */
-    --priority-low: 160 84% 39%;
+    /* Priority colors - Enhanced */
+    --priority-low: 160 84% 45%;
     --priority-low-foreground: 0 0% 100%;
-    --priority-medium: 45 93% 47%;
+    --priority-medium: 45 93% 52%;
     --priority-medium-foreground: 0 0% 100%;
-    --priority-high: 25 95% 53%;
+    --priority-high: 25 95% 58%;
     --priority-high-foreground: 0 0% 100%;
     --priority-critical: 0 84% 60%;
     --priority-critical-foreground: 0 0% 100%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --gradient-tech: linear-gradient(135deg, hsl(217 91% 60%), hsl(280 85% 60%));
+    /* Gradients - More dramatic */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(280 85% 60%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(280 65% 55%) 0%, hsl(217 91% 55%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 26% 6%) 0%, hsl(220 26% 8%) 100%);
+    --gradient-tech: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(280 85% 60%) 50%, hsl(180 80% 45%) 100%);
+    --gradient-neon: linear-gradient(90deg, hsl(217 91% 55%) 0%, hsl(180 80% 45%) 50%, hsl(280 85% 60%) 100%);
     
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(217 91% 60% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(217 91% 60% / 0.1), 0 2px 4px -1px hsl(217 91% 60% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(217 91% 60% / 0.1), 0 4px 6px -2px hsl(217 91% 60% / 0.05);
-    --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.3);
+    /* Shadows - More dramatic with glow */
+    --shadow-sm: 0 2px 4px 0 hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 8px -2px hsl(0 0% 0% / 0.5), 0 0 20px hsl(217 91% 55% / 0.1);
+    --shadow-lg: 0 10px 20px -5px hsl(0 0% 0% / 0.6), 0 0 40px hsl(217 91% 55% / 0.15);
+    --shadow-glow: 0 0 40px hsl(217 91% 55% / 0.4);
+    --shadow-glow-strong: 0 0 60px hsl(217 91% 55% / 0.6), 0 0 100px hsl(280 85% 60% / 0.3);
+    --shadow-neon: 0 0 20px hsl(217 91% 55% / 0.8), 0 0 40px hsl(217 91% 55% / 0.4);
     
     /* Animations */
     --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -204,10 +211,10 @@ All colors MUST be HSL.
 /* Custom animations */
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.15);
   }
   50% {
-    box-shadow: 0 0 30px hsl(var(--primary) / 0.4);
+    box-shadow: 0 0 50px hsl(var(--primary) / 0.5), 0 0 80px hsl(var(--primary) / 0.25);
   }
 }
 
@@ -220,10 +227,42 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.8);
+  }
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .animate-glow {
   animation: glow 3s ease-in-out infinite;
 }
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-border-flow {
+  animation: border-flow 3s ease infinite;
+  background-size: 200% 200%;
 }
