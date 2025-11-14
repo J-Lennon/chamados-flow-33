@@ -32,15 +32,15 @@ serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
-    // Verificar role admin
+    // Verificar role admin ou agent
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .single()
 
-    if (!roleData || roleData.role !== 'admin') {
-      throw new Error('Unauthorized: Admin access required')
+    if (!roleData || (roleData.role !== 'admin' && roleData.role !== 'agent')) {
+      throw new Error('Unauthorized: Admin or Agent access required')
     }
 
     const { action, userData } = await req.json()
