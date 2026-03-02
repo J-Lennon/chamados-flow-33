@@ -170,6 +170,14 @@ serve(async (req) => {
       }
 
       case 'delete': {
+        // Only admins can delete users
+        if (roleData.role !== 'admin') {
+          return new Response(JSON.stringify({ error: 'Only admins can delete users' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
         const validated = deleteUserSchema.parse(userData)
 
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(validated.userId)

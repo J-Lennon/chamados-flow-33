@@ -151,20 +151,20 @@ export function Dashboard() {
   return (
     <div className="space-y-6" ref={dashboardRef}>
       {/* Header with Export */}
-      <div className="flex items-center justify-between p-6 rounded-xl bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/20 backdrop-blur-sm">
+      <div className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-xl shadow-[0_0_30px_rgba(239,68,68,0.08)]">
         <div className="space-y-2">
-          <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+          <h2 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
             Dashboard Executivo
           </h2>
           <p className="text-muted-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary animate-pulse-glow" />
-            Visão estratégica e análise de performance da equipe em tempo real
+            <Zap className="h-4 w-4 text-primary animate-pulse" />
+            Visão estratégica e análise de performance em tempo real
           </p>
         </div>
         <Button 
           onClick={handleExportPDF} 
           variant="outline" 
-          className="gap-2 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30 hover:border-primary/50 hover:shadow-glow transition-all"
+          className="gap-2 rounded-xl border-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all"
         >
           <Download className="h-4 w-4" />
           Exportar PDF
@@ -173,7 +173,7 @@ export function Dashboard() {
 
       {/* Team Performance Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-[0_0_20px_rgba(239,68,68,0.06)] hover:shadow-[0_0_25px_rgba(239,68,68,0.12)] transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
@@ -181,13 +181,13 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-primary">{data.teamMetrics.slaComplianceRate}%</div>
+            <div className="text-3xl font-black text-primary">{data.teamMetrics.slaComplianceRate}%</div>
             <p className="text-xs text-muted-foreground mt-1">Meta: 95%</p>
             <Progress value={data.teamMetrics.slaComplianceRate} className="mt-2 h-2" />
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+        <Card className="rounded-2xl bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.06)] hover:shadow-[0_0_25px_rgba(34,197,94,0.12)] transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -195,12 +195,12 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{data.teamMetrics.totalResolved}</div>
+            <div className="text-3xl font-black text-green-600">{data.teamMetrics.totalResolved}</div>
             <p className="text-xs text-muted-foreground mt-1">Chamados finalizados</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20">
+        <Card className="rounded-2xl bg-gradient-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.06)] hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
@@ -208,12 +208,12 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-600">{data.teamMetrics.avgResolutionTime}</div>
+            <div className="text-3xl font-black text-amber-600">{data.teamMetrics.avgResolutionTime}</div>
             <p className="text-xs text-muted-foreground mt-1">Resolução média</p>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+        <Card className="rounded-2xl bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.06)] hover:shadow-[0_0_25px_rgba(59,130,246,0.12)] transition-all">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -221,7 +221,7 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{data.teamMetrics.activeTickets}</div>
+            <div className="text-3xl font-black text-blue-600">{data.teamMetrics.activeTickets}</div>
             <p className="text-xs text-muted-foreground mt-1">Em atendimento</p>
           </CardContent>
         </Card>
@@ -234,25 +234,25 @@ export function Dashboard() {
           return (
             <Card 
               key={index} 
-              className="relative border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow hover:border-primary/50 transition-all duration-300 overflow-hidden group"
+              className="relative rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.1)] hover:border-primary/40 transition-all duration-300 overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   {kpi.title}
                 </CardTitle>
-                <div className={`p-2 rounded-lg ${kpi.bgColor} group-hover:shadow-neon transition-shadow`}>
+                <div className={`p-2.5 rounded-xl ${kpi.bgColor} group-hover:shadow-[0_0_12px_rgba(239,68,68,0.2)] transition-shadow`}>
                   <Icon className={`h-4 w-4 ${kpi.color}`} />
                 </div>
               </CardHeader>
               <CardContent className="relative z-10">
                 <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                  <div className="text-3xl font-black">
                     {kpi.value}
                   </div>
                   <Badge 
                     variant="secondary" 
-                    className="text-xs bg-gradient-to-r from-primary/20 to-secondary/20 border-primary/30"
+                    className="text-xs rounded-lg"
                   >
                     {kpi.trend}
                   </Badge>
@@ -264,7 +264,7 @@ export function Dashboard() {
       </div>
 
       {/* Agent Performance */}
-      <Card className="border-2">
+      <Card className="rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
@@ -321,7 +321,7 @@ export function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Status Queue */}
-        <Card className="lg:col-span-2 border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow transition-all">
+        <Card className="lg:col-span-2 rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.08)] transition-all">
           <CardHeader className="bg-gradient-to-r from-primary/20 via-secondary/10 to-transparent border-b border-primary/20">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-primary/10 animate-pulse-glow">
@@ -354,7 +354,7 @@ export function Dashboard() {
         </Card>
 
         {/* Priority Distribution */}
-        <Card className="border-primary/30 shadow-lg backdrop-blur-sm bg-gradient-to-br from-card/80 to-card/50 hover:shadow-glow transition-all">
+        <Card className="rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.08)] transition-all">
           <CardHeader className="bg-gradient-to-r from-secondary/20 via-accent/10 to-transparent border-b border-primary/20">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-secondary/10 animate-pulse-glow">
@@ -393,7 +393,7 @@ export function Dashboard() {
         </Card>
 
         {/* Volume Chart */}
-        <Card className="lg:col-span-2 border-2">
+        <Card className="lg:col-span-2 rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
@@ -426,7 +426,7 @@ export function Dashboard() {
         </Card>
 
         {/* Top Assignees */}
-        <Card className="border-2">
+        <Card className="rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
@@ -469,7 +469,7 @@ export function Dashboard() {
       </div>
 
       {/* Urgent Tickets */}
-      <Card className="border-2 border-red-200 dark:border-red-900">
+      <Card className="rounded-2xl border-red-200/50 dark:border-red-900/50 shadow-[0_0_20px_rgba(239,68,68,0.06)]">
         <CardHeader className="flex flex-row items-center justify-between bg-red-50 dark:bg-red-950/20">
           <div>
             <CardTitle className="flex items-center gap-2">

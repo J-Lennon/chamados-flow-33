@@ -80,12 +80,21 @@ export function Header() {
           className="flex items-center gap-2 group hover:scale-105 transition-all duration-300"
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-yellow-500/50 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
-            <div className="relative bg-gradient-to-br from-red-600 via-red-500 to-red-700 text-white px-3 py-1.5 rounded-lg font-bold text-xl tracking-tight shadow-lg shadow-yellow-500/20">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-700 via-red-500 to-yellow-500/40 rounded-xl blur-md group-hover:blur-lg transition-all opacity-80"></div>
+            <div className="relative bg-gradient-to-br from-red-800 via-red-600 to-red-900 text-white px-3 py-1.5 rounded-xl font-black text-xl tracking-tighter shadow-[0_0_15px_rgba(239,68,68,0.5),0_0_30px_rgba(234,179,8,0.2)] border border-red-400/30">
               TD
             </div>
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]" style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3), 0 0 40px rgba(234, 179, 8, 0.15)' }}>
+          <span 
+            className="text-xl font-black tracking-wide"
+            style={{ 
+              background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 25%, #f87171 50%, #ef4444 75%, #dc2626 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              filter: 'drop-shadow(0 0 8px rgba(234,179,8,0.5)) drop-shadow(0 0 20px rgba(234,179,8,0.2))',
+              textShadow: 'none'
+            }}
+          >
             TeleDesk
           </span>
         </button>
