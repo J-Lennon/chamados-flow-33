@@ -1,10 +1,31 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { z } from 'https://esm.sh/zod@3.25.76'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Validation schemas
+const nameRegex = /^[a-zA-ZÀ-ÿ\s-]+$/
+
+const createUserSchema = z.object({
+  firstName: z.string().trim().min(1, 'First name is required').max(50).regex(nameRegex, 'Only letters, spaces, and hyphens allowed'),
+  lastName: z.string().trim().min(1, 'Last name is required').max(50).regex(nameRegex, 'Only letters, spaces, and hyphens allowed'),
+  password: z.string().min(8, 'Password must be at least 8 characters').max(72),
+  role: z.enum(['user', 'agent', 'admin']).default('user'),
+})
+
+const updateUserSchema = z.object({
+  userId: z.string().uuid('Invalid user ID'),
+  fullName: z.string().trim().min(1).max(100).regex(nameRegex, 'Only letters, spaces, and hyphens allowed').optional(),
+  password: z.string().min(8).max(72).optional(),
+}).refine(data => data.fullName || data.password, { message: 'At least one field to update is required' })
+
+const deleteUserSchema = z.object({
+  userId: z.string().uuid('Invalid user ID'),
+})
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -23,16 +44,26 @@ serve(async (req) => {
       }
     )
 
-    // Verificar se o usuário atual é admin
-    const authHeader = req.headers.get('Authorization')!
+    // Verify current user is authenticated
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
     
     if (userError || !user) {
-      throw new Error('Unauthorized')
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
-    // Verificar role admin ou agent
+    // Verify admin or agent role
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -40,21 +71,43 @@ serve(async (req) => {
       .single()
 
     if (!roleData || (roleData.role !== 'admin' && roleData.role !== 'agent')) {
-      throw new Error('Unauthorized: Admin or Agent access required')
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
     }
 
-    const { action, userData } = await req.json()
+    const body = await req.json()
+    const { action, userData } = body
+
+    if (!action || typeof action !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid action' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
 
     switch (action) {
       case 'create': {
-        const { firstName, lastName, password, role = 'user' } = userData
-        const username = `${firstName}.${lastName}`.toLowerCase()
+        const validated = createUserSchema.parse(userData)
+        const firstName = validated.firstName.trim().replace(/\s+/g, ' ')
+        const lastName = validated.lastName.trim().replace(/\s+/g, ' ')
+        const username = `${firstName}.${lastName}`.toLowerCase().replace(/[^a-z.\-]/g, '')
         const email = `${username}@telesdesk.com`
+
+        // Prevent agents from creating admin users
+        if (roleData.role === 'agent' && validated.role === 'admin') {
+          return new Response(JSON.stringify({ error: 'Agents cannot create admin users' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          })
+        }
+
         const fullName = `${firstName} ${lastName}`
 
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
           email,
-          password,
+          password: validated.password,
           email_confirm: true,
           user_metadata: {
             full_name: fullName
@@ -63,53 +116,51 @@ serve(async (req) => {
 
         if (createError) throw createError
 
-        // Atribuir role ao usuário
+        // Assign role
         const { error: roleError } = await supabaseAdmin
           .from('user_roles')
           .insert({
             user_id: newUser.user.id,
-            role: role
+            role: validated.role
           })
 
         if (roleError) {
           console.error('Error assigning role:', roleError)
-          // Não falhar a criação do usuário se houver erro ao atribuir role
         }
 
         return new Response(
           JSON.stringify({ 
             success: true, 
             user: newUser,
-            credentials: { username, password, email }
+            credentials: { username, password: validated.password, email }
           }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
 
       case 'update': {
-        const { userId, fullName, password } = userData
-        const updateData: any = {}
+        const validated = updateUserSchema.parse(userData)
+        const updateData: Record<string, unknown> = {}
         
-        if (fullName) {
-          updateData.user_metadata = { full_name: fullName }
+        if (validated.fullName) {
+          updateData.user_metadata = { full_name: validated.fullName }
         }
-        if (password) {
-          updateData.password = password
+        if (validated.password) {
+          updateData.password = validated.password
         }
 
         const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-          userId,
+          validated.userId,
           updateData
         )
 
         if (updateError) throw updateError
 
-        // Atualizar profile
-        if (fullName) {
+        if (validated.fullName) {
           await supabaseAdmin
             .from('profiles')
-            .update({ full_name: fullName })
-            .eq('id', userId)
+            .update({ full_name: validated.fullName })
+            .eq('id', validated.userId)
         }
 
         return new Response(
@@ -119,9 +170,9 @@ serve(async (req) => {
       }
 
       case 'delete': {
-        const { userId } = userData
+        const validated = deleteUserSchema.parse(userData)
 
-        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(validated.userId)
 
         if (deleteError) throw deleteError
 
@@ -132,11 +183,22 @@ serve(async (req) => {
       }
 
       default:
-        throw new Error('Invalid action')
+        return new Response(
+          JSON.stringify({ error: 'Invalid action' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
     }
   } catch (error) {
+    // Handle zod validation errors specifically
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: 'Validation error', details: error.errors.map(e => e.message) }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'An error occurred processing your request' }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
