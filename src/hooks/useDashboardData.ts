@@ -123,7 +123,7 @@ export function useDashboardData() {
       const now = new Date()
       const kpiData = {
         new: tickets.filter(t => t.status === "new").length,
-        progress: tickets.filter(t => t.status === "progress").length,
+        progress: tickets.filter(t => t.status === "progress" || (t.sla_due_date && new Date(t.sla_due_date) < now && t.status !== "completed")).length,
         completed: tickets.filter(t => t.status === "completed").length,
         overdue: tickets.filter(t => t.sla_due_date && new Date(t.sla_due_date) < now && t.status !== "completed").length,
         slaClose: tickets.filter(t => {
@@ -139,7 +139,7 @@ export function useDashboardData() {
         new: tickets.filter(t => t.status === "new").length,
         waiting: tickets.filter(t => t.status === "waiting").length,
         accepted: tickets.filter(t => t.status === "accepted").length,
-        progress: tickets.filter(t => t.status === "progress").length,
+        progress: tickets.filter(t => t.status === "progress" || (t.sla_due_date && new Date(t.sla_due_date) < now && t.status !== "completed")).length,
         completed: tickets.filter(t => t.status === "completed").length
       }
 

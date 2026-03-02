@@ -121,17 +121,18 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
             </Button>
           </div>
 
-          {/* Quick Actions - Only for agents/admins and based on ticket status */}
-          {isAgent && ticket.status !== "completed" && ticket.status !== "closed" && (
+          {/* Quick Actions - Agents can manage, requesters can respond */}
+          {ticket.status !== "completed" && ticket.status !== "closed" && (
             <div className="flex flex-wrap gap-2">
-              {!ticket.assigned_to && (
+              {/* Agent-only actions */}
+              {isAgent && !ticket.assigned_to && (
                 <Button size="sm" onClick={handleAcceptTicket}>
                   <UserCheck className="mr-2 h-4 w-4" />
                   Aceitar
                 </Button>
               )}
               
-              {!ticket.assigned_to && (
+              {isAgent && !ticket.assigned_to && (
                 <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="destructive">
@@ -164,44 +165,46 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                 </Dialog>
               )}
 
-              {ticket.assigned_to && (
-                <>
-                  <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" variant="outline">
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Enviar Pergunta
+              {/* Message button - available for agents AND requester */}
+              {(isAgent || ticket.requester_id === user?.id) && (
+                <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      {isAgent ? "Enviar Pergunta" : "Responder"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-background border shadow-lg">
+                    <DialogHeader>
+                      <DialogTitle>{isAgent ? "Enviar Pergunta ao Usuário" : "Responder Chamado"}</DialogTitle>
+                      <DialogDescription>
+                        {isAgent ? "Faça uma pergunta para esclarecer dúvidas sobre este chamado." : "Envie sua resposta para este chamado."}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Textarea
+                      placeholder={isAgent ? "Digite sua pergunta..." : "Digite sua resposta..."}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+                        Cancelar
                       </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-background border shadow-lg">
-                      <DialogHeader>
-                        <DialogTitle>Enviar Pergunta ao Usuário</DialogTitle>
-                        <DialogDescription>
-                          Faça uma pergunta para esclarecer dúvidas sobre este chamado.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Textarea
-                        placeholder="Digite sua pergunta..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        className="min-h-[100px]"
-                      />
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleSendMessage}>
-                          Enviar Pergunta
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                      <Button onClick={handleSendMessage}>
+                        {isAgent ? "Enviar Pergunta" : "Enviar Resposta"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )}
 
-                  <Button size="sm" variant="outline" onClick={handleCompleteTicket}>
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Concluir
-                  </Button>
-                </>
+              {/* Complete button - agent only */}
+              {isAgent && ticket.assigned_to && (
+                <Button size="sm" variant="outline" onClick={handleCompleteTicket}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Concluir
+                </Button>
               )}
             </div>
           )}
