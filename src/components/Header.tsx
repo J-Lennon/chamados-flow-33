@@ -80,12 +80,12 @@ export function Header() {
           className="flex items-center gap-2 group hover:scale-105 transition-all duration-300"
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/50 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
-            <div className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground px-3 py-1.5 rounded-lg font-bold text-xl tracking-tight shadow-lg">
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-yellow-500/50 rounded-lg blur-sm group-hover:blur-md transition-all"></div>
+            <div className="relative bg-gradient-to-br from-red-600 via-red-500 to-red-700 text-white px-3 py-1.5 rounded-lg font-bold text-xl tracking-tight shadow-lg shadow-yellow-500/20">
               TD
             </div>
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-red-500 via-red-400 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]" style={{ textShadow: '0 0 20px rgba(234, 179, 8, 0.3), 0 0 40px rgba(234, 179, 8, 0.15)' }}>
             TeleDesk
           </span>
         </button>
@@ -201,7 +201,7 @@ export function Header() {
             onOpenChange={setCreateTicketOpen}
           />
           
-          {isAdmin && (
+          {(isAdmin || isAgent) && (
             <CreateUserDialog 
               open={createUserOpen}
               onOpenChange={setCreateUserOpen}
