@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { StatusBadge, PriorityBadge } from "./StatusBadge"
+import { PriorityBadge } from "./StatusBadge"
 import {
   AlertTriangle,
   Clock,
@@ -31,43 +31,20 @@ export function Dashboard() {
 
   const handleExportPDF = async () => {
     if (!dashboardRef.current) return
-
     try {
-      toast({
-        title: "Gerando PDF...",
-        description: "Por favor, aguarde enquanto preparamos o relatório.",
-      })
-
-      const canvas = await html2canvas(dashboardRef.current, {
-        scale: 2,
-        logging: false,
-        useCORS: true,
-      })
-
+      toast({ title: "Gerando PDF...", description: "Por favor, aguarde." })
+      const canvas = await html2canvas(dashboardRef.current, { scale: 2, logging: false, useCORS: true })
       const imgData = canvas.toDataURL("image/png")
       const pdf = new jsPDF("p", "mm", "a4")
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = pdf.internal.pageSize.getHeight()
-      const imgWidth = canvas.width
-      const imgHeight = canvas.height
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
-      const imgX = (pdfWidth - imgWidth * ratio) / 2
-      const imgY = 10
-
-      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio)
+      const ratio = Math.min(pdfWidth / canvas.width, pdfHeight / canvas.height)
+      pdf.addImage(imgData, "PNG", (pdfWidth - canvas.width * ratio) / 2, 10, canvas.width * ratio, canvas.height * ratio)
       pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`)
-
-      toast({
-        title: "PDF exportado com sucesso!",
-        description: "O relatório foi salvo no seu computador.",
-      })
+      toast({ title: "PDF exportado com sucesso!" })
     } catch (error) {
       console.error("Error exporting PDF:", error)
-      toast({
-        title: "Erro ao exportar PDF",
-        description: "Não foi possível gerar o relatório.",
-        variant: "destructive",
-      })
+      toast({ title: "Erro ao exportar PDF", variant: "destructive" })
     }
   }
 
@@ -76,62 +53,25 @@ export function Dashboard() {
       <div className="space-y-6">
         <Skeleton className="h-20 w-full" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
+          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-32" />)}
         </div>
       </div>
     )
   }
 
   const kpiData = [
-    {
-      title: "Novos",
-      value: data.kpiData.new,
-      icon: AlertTriangle,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      trend: "+12%"
-    },
-    {
-      title: "Em Andamento",
-      value: data.kpiData.progress,
-      icon: Clock,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
-      trend: "+5%"
-    },
-    {
-      title: "Concluídos",
-      value: data.kpiData.completed,
-      icon: CheckCircle,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      trend: "+18%"
-    },
-    {
-      title: "Atrasados",
-      value: data.kpiData.overdue,
-      icon: AlertTriangle,
-      color: "text-red-500",
-      bgColor: "bg-red-500/10",
-      trend: "-3%"
-    },
-    {
-      title: "SLA Próximo",
-      value: data.kpiData.slaClose,
-      icon: Clock,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-      trend: "+8%"
-    }
+    { title: "Novos", value: data.kpiData.new, icon: AlertTriangle, color: "text-blue-500", bgColor: "bg-blue-500/10" },
+    { title: "Em Andamento", value: data.kpiData.progress, icon: Clock, color: "text-secondary", bgColor: "bg-secondary/10" },
+    { title: "Concluídos", value: data.kpiData.completed, icon: CheckCircle, color: "text-green-500", bgColor: "bg-green-500/10" },
+    { title: "Atrasados", value: data.kpiData.overdue, icon: AlertTriangle, color: "text-primary", bgColor: "bg-primary/10" },
+    { title: "SLA Próximo", value: data.kpiData.slaClose, icon: Clock, color: "text-orange-500", bgColor: "bg-orange-500/10" },
   ]
 
   const statusQueue = [
     { status: "Novos", count: data.statusQueue.new, color: "bg-blue-500" },
     { status: "Em Espera", count: data.statusQueue.waiting, color: "bg-purple-500" },
     { status: "Aceitos", count: data.statusQueue.accepted, color: "bg-cyan-500" },
-    { status: "Em Andamento", count: data.statusQueue.progress, color: "bg-amber-500" },
+    { status: "Em Andamento", count: data.statusQueue.progress, color: "bg-secondary" },
     { status: "Concluídos", count: data.statusQueue.completed, color: "bg-green-500" },
   ]
 
@@ -150,22 +90,16 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6" ref={dashboardRef}>
-      {/* Header with Export */}
-      <div className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-accent/10 border border-primary/20 backdrop-blur-xl shadow-[0_0_30px_rgba(239,68,68,0.08)]">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-            Dashboard Executivo
-          </h2>
-          <p className="text-muted-foreground flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary animate-pulse" />
+      {/* Header */}
+      <div className="flex items-center justify-between p-6 rounded-2xl bg-card border border-border shadow-sm">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-black tracking-tight">Dashboard Executivo</h2>
+          <p className="text-muted-foreground flex items-center gap-2 text-sm">
+            <Zap className="h-4 w-4 text-secondary" />
             Visão estratégica e análise de performance em tempo real
           </p>
         </div>
-        <Button 
-          onClick={handleExportPDF} 
-          variant="outline" 
-          className="gap-2 rounded-xl border-primary/30 hover:border-primary/50 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all"
-        >
+        <Button onClick={handleExportPDF} variant="outline" className="gap-2">
           <Download className="h-4 w-4" />
           Exportar PDF
         </Button>
@@ -173,7 +107,7 @@ export function Dashboard() {
 
       {/* Team Performance Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20 shadow-[0_0_20px_rgba(239,68,68,0.06)] hover:shadow-[0_0_25px_rgba(239,68,68,0.12)] transition-all">
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Target className="h-4 w-4 text-primary" />
@@ -187,7 +121,7 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.06)] hover:shadow-[0_0_25px_rgba(34,197,94,0.12)] transition-all">
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-green-500" />
@@ -200,20 +134,20 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl bg-gradient-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.06)] hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all">
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Zap className="h-4 w-4 text-amber-500" />
+              <Zap className="h-4 w-4 text-secondary" />
               Tempo Médio
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black text-amber-600">{data.teamMetrics.avgResolutionTime}</div>
+            <div className="text-3xl font-black text-secondary">{data.teamMetrics.avgResolutionTime}</div>
             <p className="text-xs text-muted-foreground mt-1">Resolução média</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.06)] hover:shadow-[0_0_25px_rgba(59,130,246,0.12)] transition-all">
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-500" />
@@ -232,31 +166,15 @@ export function Dashboard() {
         {kpiData.map((kpi, index) => {
           const Icon = kpi.icon
           return (
-            <Card 
-              key={index} 
-              className="relative rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.1)] hover:border-primary/40 transition-all duration-300 overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {kpi.title}
-                </CardTitle>
-                <div className={`p-2.5 rounded-xl ${kpi.bgColor} group-hover:shadow-[0_0_12px_rgba(239,68,68,0.2)] transition-shadow`}>
+            <Card key={index} className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.title}</CardTitle>
+                <div className={`p-2 rounded-xl ${kpi.bgColor}`}>
                   <Icon className={`h-4 w-4 ${kpi.color}`} />
                 </div>
               </CardHeader>
-              <CardContent className="relative z-10">
-                <div className="flex items-baseline justify-between">
-                  <div className="text-3xl font-black">
-                    {kpi.value}
-                  </div>
-                  <Badge 
-                    variant="secondary" 
-                    className="text-xs rounded-lg"
-                  >
-                    {kpi.trend}
-                  </Badge>
-                </div>
+              <CardContent>
+                <div className="text-3xl font-black">{kpi.value}</div>
               </CardContent>
             </Card>
           )
@@ -264,15 +182,13 @@ export function Dashboard() {
       </div>
 
       {/* Agent Performance */}
-      <Card className="rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
+      <Card className="rounded-2xl shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             Performance dos Agentes
           </CardTitle>
-          <CardDescription>
-            Métricas individuais de eficiência e produtividade
-          </CardDescription>
+          <CardDescription>Métricas individuais de eficiência e produtividade</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -286,13 +202,9 @@ export function Dashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="font-semibold">{agent.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {agent.completedTickets} chamados concluídos
-                        </div>
+                        <div className="text-sm text-muted-foreground">{agent.completedTickets} chamados concluídos</div>
                       </div>
-                      <Badge variant="outline" className="text-xs">
-                        #{index + 1}
-                      </Badge>
+                      <Badge variant="outline" className="text-xs">#{index + 1}</Badge>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
@@ -301,7 +213,7 @@ export function Dashboard() {
                       </div>
                       <div>
                         <span className="text-muted-foreground">SLA: </span>
-                        <span className={`font-semibold ${agent.slaCompliance >= 95 ? 'text-green-600' : agent.slaCompliance >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
+                        <span className={`font-semibold ${agent.slaCompliance >= 95 ? 'text-green-600' : agent.slaCompliance >= 80 ? 'text-secondary' : 'text-primary'}`}>
                           {agent.slaCompliance}%
                         </span>
                       </div>
@@ -311,9 +223,7 @@ export function Dashboard() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                Nenhum dado de performance disponível
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-8">Nenhum dado de performance disponível</p>
             )}
           </div>
         </CardContent>
@@ -321,32 +231,22 @@ export function Dashboard() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Status Queue */}
-        <Card className="lg:col-span-2 rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.08)] transition-all">
-          <CardHeader className="bg-gradient-to-r from-primary/20 via-secondary/10 to-transparent border-b border-primary/20">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10 animate-pulse-glow">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  Fila por Status
-                </CardTitle>
-                <CardDescription>Distribuição de chamados por status atual</CardDescription>
-              </div>
-            </div>
+        <Card className="lg:col-span-2 rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Fila por Status
+            </CardTitle>
+            <CardDescription>Distribuição de chamados por status atual</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-5">
               {statusQueue.map((item) => (
                 <div key={item.status} className="text-center space-y-3">
-                  <div className={`h-20 ${item.color} rounded-lg flex items-center justify-center`}>
+                  <div className={`h-20 ${item.color} rounded-xl flex items-center justify-center`}>
                     <div className="text-3xl font-bold text-white">{item.count}</div>
                   </div>
                   <div className="text-sm font-medium">{item.status}</div>
-                  <Button variant="ghost" size="sm" className="text-xs h-auto p-1 hover:bg-primary/10">
-                    Ver todos
-                    <ArrowRight className="ml-1 h-3 w-3" />
-                  </Button>
                 </div>
               ))}
             </div>
@@ -354,19 +254,13 @@ export function Dashboard() {
         </Card>
 
         {/* Priority Distribution */}
-        <Card className="rounded-2xl border-primary/20 shadow-lg backdrop-blur-xl bg-gradient-to-br from-card/90 to-card/60 hover:shadow-[0_0_25px_rgba(239,68,68,0.08)] transition-all">
-          <CardHeader className="bg-gradient-to-r from-secondary/20 via-accent/10 to-transparent border-b border-primary/20">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-secondary/10 animate-pulse-glow">
-                <PieChart className="h-5 w-5 text-secondary" />
-              </div>
-              <div>
-                <CardTitle className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
-                  Prioridades
-                </CardTitle>
-                <CardDescription>Distribuição por nível de prioridade</CardDescription>
-              </div>
-            </div>
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="h-5 w-5 text-primary" />
+              Prioridades
+            </CardTitle>
+            <CardDescription>Distribuição por nível de prioridade</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {priorityWithPercentage.length > 0 ? (
@@ -377,31 +271,25 @@ export function Dashboard() {
                       <PriorityBadge priority={item.priority} />
                       <span className="text-sm font-medium">{item.count}</span>
                     </div>
-                    <div className="text-sm text-muted-foreground font-semibold">
-                      {item.percentage}%
-                    </div>
+                    <div className="text-sm text-muted-foreground font-semibold">{item.percentage}%</div>
                   </div>
                   <Progress value={item.percentage} className="h-2" />
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Nenhum chamado cadastrado
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum chamado cadastrado</p>
             )}
           </CardContent>
         </Card>
 
         {/* Volume Chart */}
-        <Card className="lg:col-span-2 rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
+        <Card className="lg:col-span-2 rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
               Volume por Dia
             </CardTitle>
-            <CardDescription>
-              Chamados abertos nos últimos 14 dias
-            </CardDescription>
+            <CardDescription>Chamados abertos nos últimos 14 dias</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-[200px] flex items-end justify-between gap-1">
@@ -410,14 +298,13 @@ export function Dashboard() {
                 const height = (day.tickets / maxTickets) * 100
                 return (
                   <div key={index} className="flex flex-col items-center gap-2 flex-1 group">
-                    <div 
-                      className="bg-gradient-to-t from-primary to-primary/50 rounded-t-lg w-full min-h-[4px] transition-all group-hover:from-primary group-hover:to-primary/70"
-                      style={{ height: `${height}%` }}
-                      title={`${day.date}: ${day.tickets} chamados`}
+                    <div
+                      className="bg-primary/80 hover:bg-primary rounded-t-md w-full min-h-[4px] transition-colors"
+                      style={{ height: `${Math.max(height, 4)}%` }}
                     />
-                    <span className="text-xs text-muted-foreground rotate-45 origin-center whitespace-nowrap">
+                    <div className="text-[10px] text-muted-foreground truncate w-full text-center">
                       {day.date}
-                    </span>
+                    </div>
                   </div>
                 )
               })}
@@ -426,99 +313,34 @@ export function Dashboard() {
         </Card>
 
         {/* Top Assignees */}
-        <Card className="rounded-2xl border-primary/15 shadow-lg backdrop-blur-xl">
+        <Card className="rounded-2xl shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              Mais Demandados
+              Top Responsáveis
             </CardTitle>
-            <CardDescription>
-              Responsáveis com mais chamados ativos
-            </CardDescription>
+            <CardDescription>Agentes com mais chamados atribuídos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {data.topAssignees.length > 0 ? (
               data.topAssignees.map((assignee, index) => (
-                <div key={assignee.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-bold shadow-lg">
+                <div key={assignee.name} className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
                     {assignee.avatar}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold truncate">
-                      {assignee.name}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {assignee.count} chamados ativos
-                    </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{assignee.name}</div>
+                    <div className="text-xs text-muted-foreground">{assignee.count} chamados</div>
                   </div>
-                  <Badge 
-                    variant={index === 0 ? "default" : "secondary"} 
-                    className="text-xs font-bold"
-                  >
-                    #{index + 1}
-                  </Badge>
+                  <Badge variant="outline" className="text-xs">#{index + 1}</Badge>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Nenhum chamado atribuído
-              </p>
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum dado disponível</p>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Urgent Tickets */}
-      <Card className="rounded-2xl border-red-200/50 dark:border-red-900/50 shadow-[0_0_20px_rgba(239,68,68,0.06)]">
-        <CardHeader className="flex flex-row items-center justify-between bg-red-50 dark:bg-red-950/20">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              Chamados Urgentes
-            </CardTitle>
-            <CardDescription>
-              Chamados com SLA próximo do limite ou atrasados
-            </CardDescription>
-          </div>
-          <Button variant="outline" size="sm">
-            Ver todos
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-4">
-            {data.urgentTickets.length > 0 ? (
-              data.urgentTickets.map((ticket) => (
-                <div key={ticket.id} className="flex items-center justify-between p-4 border-2 rounded-lg bg-card hover:shadow-md transition-shadow">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-mono text-sm font-bold bg-muted px-2 py-1 rounded">{ticket.id}</span>
-                      <StatusBadge status={ticket.status} />
-                      <PriorityBadge priority={ticket.priority} />
-                    </div>
-                    <div className="text-sm font-semibold truncate mb-1">{ticket.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      Solicitante: {ticket.requester}
-                    </div>
-                  </div>
-                  <div className="text-right ml-4">
-                    <Badge 
-                      variant={ticket.sla.includes("Atrasado") ? "destructive" : "secondary"}
-                      className="text-xs font-semibold"
-                    >
-                      {ticket.sla}
-                    </Badge>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8 bg-green-50 dark:bg-green-950/20 rounded-lg border-2 border-green-200 dark:border-green-900">
-                ✅ Nenhum chamado urgente no momento
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
