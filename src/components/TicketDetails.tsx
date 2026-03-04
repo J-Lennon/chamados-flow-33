@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Sheet,
   SheetContent,
@@ -33,7 +33,8 @@ import {
   UserCheck,
   CheckCircle,
   X,
-  Calendar
+  Calendar,
+  Send
 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -48,8 +49,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
   const [rejectReason, setRejectReason] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
-  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false)
-  
+
   const { user } = useAuth()
   const { isAgent } = useUserRole(user?.id)
   const { acceptTicket, rejectTicket, sendMessage, completeTicket } = useTickets()
@@ -57,6 +57,9 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
   const { history } = useTicketHistory(ticket?.id || null)
 
   if (!ticket) return null
+
+  const isRequester = ticket.requester_id === user?.id
+  const canRespond = isAgent || isRequester
 
   const handleAcceptTicket = async () => {
     if (!user) return
@@ -76,7 +79,6 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
     if (!user || !newMessage.trim()) return
     await sendMessage(ticket.id, user.id, newMessage)
     setNewMessage("")
-    setIsMessageDialogOpen(false)
   }
 
   const handleCompleteTicket = async () => {
@@ -105,7 +107,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={() => onClose()}>
-      <SheetContent className="w-[600px] sm:w-[700px] sm:max-w-[90vw]">
+      <SheetContent className="w-[600px] sm:w-[700px] sm:max-w-[90vw] overflow-y-auto">
         <SheetHeader className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
@@ -121,17 +123,16 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
             </Button>
           </div>
 
-          {/* Quick Actions - Agents can manage, requesters can respond */}
+          {/* Quick Actions */}
           {ticket.status !== "completed" && ticket.status !== "closed" && (
             <div className="flex flex-wrap gap-2">
-              {/* Agent-only actions */}
               {isAgent && !ticket.assigned_to && (
                 <Button size="sm" onClick={handleAcceptTicket}>
                   <UserCheck className="mr-2 h-4 w-4" />
                   Aceitar
                 </Button>
               )}
-              
+
               {isAgent && !ticket.assigned_to && (
                 <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
                   <DialogTrigger asChild>
@@ -140,12 +141,10 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                       Recusar
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-background border shadow-lg">
+                  <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Recusar Chamado</DialogTitle>
-                      <DialogDescription>
-                        Por favor, informe o motivo da recusa deste chamado.
-                      </DialogDescription>
+                      <DialogDescription>Informe o motivo da recusa deste chamado.</DialogDescription>
                     </DialogHeader>
                     <Textarea
                       placeholder="Digite o motivo da recusa..."
@@ -154,52 +153,13 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                       className="min-h-[100px]"
                     />
                     <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button variant="destructive" onClick={handleRejectTicket}>
-                        Confirmar Recusa
-                      </Button>
+                      <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>Cancelar</Button>
+                      <Button variant="destructive" onClick={handleRejectTicket}>Confirmar Recusa</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               )}
 
-              {/* Message button - available for agents AND requester */}
-              {(isAgent || ticket.requester_id === user?.id) && (
-                <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      {isAgent ? "Enviar Pergunta" : "Responder"}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="bg-background border shadow-lg">
-                    <DialogHeader>
-                      <DialogTitle>{isAgent ? "Enviar Pergunta ao Usuário" : "Responder Chamado"}</DialogTitle>
-                      <DialogDescription>
-                        {isAgent ? "Faça uma pergunta para esclarecer dúvidas sobre este chamado." : "Envie sua resposta para este chamado."}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Textarea
-                      placeholder={isAgent ? "Digite sua pergunta..." : "Digite sua resposta..."}
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
-                        Cancelar
-                      </Button>
-                      <Button onClick={handleSendMessage}>
-                        {isAgent ? "Enviar Pergunta" : "Enviar Resposta"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              )}
-
-              {/* Complete button - agent only */}
               {isAgent && ticket.assigned_to && (
                 <Button size="sm" variant="outline" onClick={handleCompleteTicket}>
                   <CheckCircle className="mr-2 h-4 w-4" />
@@ -212,25 +172,21 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
         <div className="space-y-6 mt-6">
           {/* SLA Status */}
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
+          <div className={`flex items-center gap-2 p-3 rounded-lg ${slaStatus.isUrgent ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'}`}>
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">SLA:</span>
             <Badge variant={slaStatus.variant} className="text-xs">
               {slaStatus.text}
             </Badge>
             {slaStatus.isUrgent && (
-              <span className="text-xs text-muted-foreground ml-auto">
-                ⚠️ Atenção necessária
-              </span>
+              <span className="text-xs text-destructive ml-auto font-medium">⚠️ Atenção necessária</span>
             )}
           </div>
 
           {/* Description */}
           <div className="space-y-2">
             <h3 className="font-semibold">Descrição</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {ticket.description}
-            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{ticket.description}</p>
           </div>
 
           <Separator />
@@ -245,7 +201,6 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                   <div className="text-sm text-muted-foreground">{ticket.requester?.full_name || "Desconhecido"}</div>
                 </div>
               </div>
-
               <div className="flex items-center gap-2">
                 <Building className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -254,18 +209,14 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                 </div>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <div className="text-sm font-medium">Responsável</div>
-                  <div className="text-sm text-muted-foreground">
-                    {ticket.assignee?.full_name || "Não atribuído"}
-                  </div>
+                  <div className="text-sm text-muted-foreground">{ticket.assignee?.full_name || "Não atribuído"}</div>
                 </div>
               </div>
-
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
@@ -280,33 +231,55 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
           <Separator />
 
-          {/* Messages */}
-          {messages.length > 0 && (
-            <>
-              <div className="space-y-3">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Mensagens ({messages.length})
-                </h3>
-                <div className="space-y-3">
-                  {messages.map((message) => (
-                    <div key={message.id} className="p-3 border rounded-lg bg-muted/30">
+          {/* Messages section - chat style */}
+          <div className="space-y-3">
+            <h3 className="font-semibold flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Mensagens ({messages.length})
+            </h3>
+
+            {messages.length > 0 && (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {messages.map((message) => {
+                  const isMine = message.sender_id === user?.id
+                  return (
+                    <div key={message.id} className={`p-3 rounded-lg border ${isMine ? 'bg-primary/5 border-primary/20 ml-6' : 'bg-muted/50 border-border mr-6'}`}>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium">
-                          {message.sender?.full_name || "Usuário"}
-                        </span>
+                        <span className="text-sm font-medium">{message.sender?.full_name || "Usuário"}</span>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(message.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                          {format(new Date(message.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })}
                         </span>
                       </div>
                       <p className="text-sm">{message.message}</p>
                     </div>
-                  ))}
-                </div>
+                  )
+                })}
               </div>
-              <Separator />
-            </>
-          )}
+            )}
+
+            {/* Inline reply box - available for agents AND requester */}
+            {canRespond && ticket.status !== "completed" && ticket.status !== "closed" && (
+              <div className="flex gap-2 pt-2">
+                <Textarea
+                  placeholder={isAgent ? "Escreva sua mensagem..." : "Responda aqui..."}
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="min-h-[60px] resize-none"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSendMessage()
+                    }
+                  }}
+                />
+                <Button size="icon" onClick={handleSendMessage} disabled={!newMessage.trim()} className="shrink-0 self-end">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <Separator />
 
           {/* Activity Timeline */}
           <div className="space-y-3">
@@ -319,13 +292,11 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                   <div key={item.id} className="flex gap-3">
                     <div className="flex flex-col items-center">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-xs bg-primary/10 text-primary">
                           {item.user?.full_name?.split(" ").map(n => n[0]).join("") || "?"}
                         </AvatarFallback>
                       </Avatar>
-                      {index < history.length - 1 && (
-                        <div className="w-px h-8 bg-border mt-2" />
-                      )}
+                      {index < history.length - 1 && <div className="w-px h-8 bg-border mt-2" />}
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="text-sm">
