@@ -26,6 +26,7 @@ import { useTicketHistory } from "@/hooks/useTicketHistory"
 import { useAuth } from "@/hooks/useAuth"
 import { useUserRole } from "@/hooks/useUserRole"
 import { useEmpresa } from "@/hooks/useEmpresa"
+import { useAI } from "@/hooks/useAI"
 import {
   Clock,
   User,
@@ -35,7 +36,9 @@ import {
   CheckCircle,
   X,
   Calendar,
-  Send
+  Send,
+  Sparkles,
+  Loader2,
 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -57,6 +60,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
   const { acceptTicket, rejectTicket, sendMessage, completeTicket } = useTickets()
   const { messages } = useTicketMessages(ticket?.id || null)
   const { history } = useTicketHistory(ticket?.id || null)
+  const { suggestResponse, loading: aiLoading } = useAI()
 
   if (!ticket) return null
 
@@ -86,6 +90,22 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
   const handleCompleteTicket = async () => {
     await completeTicket(ticket.id)
     onClose()
+  }
+
+  const handleAISuggest = async () => {
+    const result = await suggestResponse({
+      title: ticket.title,
+      description: ticket.description,
+      status: ticket.status,
+      priority: ticket.priority,
+      messages: messages.map(m => ({
+        sender: m.sender?.full_name || "Usuário",
+        message: m.message,
+      })),
+    })
+    if (result) {
+      setNewMessage(result.suggestedResponse)
+    }
   }
 
   const getSLAStatus = (sla: string) => {
@@ -261,22 +281,42 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
             {/* Inline reply box - available for agents AND requester */}
             {canRespond && ticket.status !== "completed" && ticket.status !== "closed" && (
-              <div className="flex gap-2 pt-2">
-                <Textarea
-                  placeholder={isAgent ? "Escreva sua mensagem..." : "Responda aqui..."}
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  className="min-h-[60px] resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSendMessage()
-                    }
-                  }}
-                />
-                <Button size="icon" onClick={handleSendMessage} disabled={!newMessage.trim()} className="shrink-0 self-end">
-                  <Send className="h-4 w-4" />
-                </Button>
+              <div className="space-y-2 pt-2">
+                {/* AI Suggest button for agents */}
+                {isAgent && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAISuggest}
+                    disabled={aiLoading}
+                    className="border-secondary/50 hover:bg-secondary/10"
+                  >
+                    {aiLoading ? (
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-2 h-3 w-3 text-secondary" />
+                    )}
+                    Sugerir com IA
+                  </Button>
+                )}
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder={isAgent ? "Escreva sua mensagem..." : "Responda aqui..."}
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    className="min-h-[60px] resize-none"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSendMessage()
+                      }
+                    }}
+                  />
+                  <Button size="icon" onClick={handleSendMessage} disabled={!newMessage.trim()} className="shrink-0 self-end">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             )}
           </div>
