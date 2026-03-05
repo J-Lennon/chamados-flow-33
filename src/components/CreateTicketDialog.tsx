@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { useEmpresa } from "@/hooks/useEmpresa"
+import { useAuth } from "@/hooks/useAuth"
 import { Plus, Loader2 } from "lucide-react"
 
 interface CreateTicketDialogProps {
@@ -44,6 +46,8 @@ export function CreateTicketDialog({
   const [city, setCity] = useState("")
   const [department, setDepartment] = useState("")
   const { toast } = useToast()
+  const { user } = useAuth()
+  const { empresaId } = useEmpresa(user?.id)
 
   const handleOpenChange = (value: boolean) => {
     if (onOpenChange) {
@@ -74,6 +78,7 @@ export function CreateTicketDialog({
         department,
         requester_id: user.id,
         status: "new",
+        empresa_id: empresaId,
       })
 
       if (error) throw error

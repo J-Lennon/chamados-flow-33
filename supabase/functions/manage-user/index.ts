@@ -63,12 +63,14 @@ serve(async (req) => {
       })
     }
 
-    // Verify admin or agent role
+    // Verify admin or agent role and get empresa_id
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
-      .select('role')
+      .select('role, empresa_id')
       .eq('user_id', user.id)
       .single()
+
+    const callerEmpresaId = roleData?.empresa_id
 
     if (!roleData || (roleData.role !== 'admin' && roleData.role !== 'agent')) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
@@ -116,13 +118,20 @@ serve(async (req) => {
 
         if (createError) throw createError
 
-        // Assign role
+        // Assign role with empresa_id
         const { error: roleError } = await supabaseAdmin
           .from('user_roles')
           .insert({
             user_id: newUser.user.id,
-            role: validated.role
+            role: validated.role,
+            empresa_id: callerEmpresaId
           })
+
+        // Update profile with empresa_id
+        await supabaseAdmin
+          .from('profiles')
+          .update({ empresa_id: callerEmpresaId })
+          .eq('id', newUser.user.id)
 
         if (roleError) {
           console.error('Error assigning role:', roleError)

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/useAuth"
+import { useEmpresa } from "@/hooks/useEmpresa"
 
 export interface Ticket {
   id: string
@@ -26,6 +28,8 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
+  const { user } = useAuth()
+  const { empresaId } = useEmpresa(user?.id)
 
   const fetchTickets = async () => {
     try {
@@ -105,6 +109,7 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
           sender_id: userId,
           message: `Chamado recusado. Motivo: ${reason}`,
           is_internal: false,
+          empresa_id: empresaId,
         })
 
       if (messageError) throw messageError
@@ -134,6 +139,7 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
           sender_id: userId,
           message,
           is_internal: false,
+          empresa_id: empresaId,
         })
 
       if (error) throw error

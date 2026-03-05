@@ -25,6 +25,7 @@ import { useTicketMessages } from "@/hooks/useTicketMessages"
 import { useTicketHistory } from "@/hooks/useTicketHistory"
 import { useAuth } from "@/hooks/useAuth"
 import { useUserRole } from "@/hooks/useUserRole"
+import { useEmpresa } from "@/hooks/useEmpresa"
 import {
   Clock,
   User,
@@ -52,6 +53,7 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
 
   const { user } = useAuth()
   const { isAgent } = useUserRole(user?.id)
+  const { empresaId } = useEmpresa(user?.id)
   const { acceptTicket, rejectTicket, sendMessage, completeTicket } = useTickets()
   const { messages } = useTicketMessages(ticket?.id || null)
   const { history } = useTicketHistory(ticket?.id || null)
