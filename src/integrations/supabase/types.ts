@@ -14,10 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      empresas: {
+        Row: {
+          ativo: boolean
+          created_at: string | null
+          data_contratacao: string
+          id: string
+          nome: string
+          plano: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string | null
+          data_contratacao?: string
+          id?: string
+          nome: string
+          plano?: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string | null
+          data_contratacao?: string
+          id?: string
+          nome?: string
+          plano?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          empresa_id: string | null
           full_name: string | null
           id: string
           role: string | null
@@ -26,6 +57,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          empresa_id?: string | null
           full_name?: string | null
           id: string
           role?: string | null
@@ -34,18 +66,28 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          empresa_id?: string | null
           full_name?: string | null
           id?: string
           role?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ticket_history: {
         Row: {
           action: string
           created_at: string | null
           details: string | null
+          empresa_id: string | null
           id: string
           performed_by: string | null
           ticket_id: string
@@ -54,6 +96,7 @@ export type Database = {
           action: string
           created_at?: string | null
           details?: string | null
+          empresa_id?: string | null
           id?: string
           performed_by?: string | null
           ticket_id: string
@@ -62,11 +105,19 @@ export type Database = {
           action?: string
           created_at?: string | null
           details?: string | null
+          empresa_id?: string | null
           id?: string
           performed_by?: string | null
           ticket_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ticket_history_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ticket_history_performed_by_fkey"
             columns: ["performed_by"]
@@ -86,6 +137,7 @@ export type Database = {
       ticket_messages: {
         Row: {
           created_at: string | null
+          empresa_id: string | null
           id: string
           is_internal: boolean | null
           message: string
@@ -94,6 +146,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           is_internal?: boolean | null
           message: string
@@ -102,6 +155,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           is_internal?: boolean | null
           message?: string
@@ -109,6 +163,13 @@ export type Database = {
           ticket_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ticket_messages_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ticket_messages_sender_id_fkey"
             columns: ["sender_id"]
@@ -132,6 +193,7 @@ export type Database = {
           created_at: string | null
           department: string | null
           description: string
+          empresa_id: string | null
           id: string
           priority: string | null
           requester_id: string | null
@@ -146,6 +208,7 @@ export type Database = {
           created_at?: string | null
           department?: string | null
           description: string
+          empresa_id?: string | null
           id?: string
           priority?: string | null
           requester_id?: string | null
@@ -160,6 +223,7 @@ export type Database = {
           created_at?: string | null
           department?: string | null
           description?: string
+          empresa_id?: string | null
           id?: string
           priority?: string | null
           requester_id?: string | null
@@ -177,6 +241,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tickets_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tickets_requester_id_fkey"
             columns: ["requester_id"]
             isOneToOne: false
@@ -188,29 +259,41 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
+          empresa_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
+          empresa_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_user_empresa_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -222,6 +305,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "agent" | "user" | "super_admin"
