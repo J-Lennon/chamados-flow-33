@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
+import { LevelBadge } from "./LevelBadge"
 import { MoreHorizontal, Eye, Info } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
