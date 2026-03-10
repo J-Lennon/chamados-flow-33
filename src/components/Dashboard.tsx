@@ -9,14 +9,17 @@ import {
   Clock,
   CheckCircle,
   Users,
-  ArrowRight,
   BarChart3,
   PieChart,
   Calendar,
   Download,
   TrendingUp,
   Target,
-  Zap
+  Zap,
+  ArrowUpCircle,
+  Shield,
+  ArrowRight,
+  Building,
 } from "lucide-react"
 import { useDashboardData } from "@/hooks/useDashboardData"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -35,12 +38,25 @@ export function Dashboard() {
       toast({ title: "Gerando PDF...", description: "Por favor, aguarde." })
       const canvas = await html2canvas(dashboardRef.current, { scale: 2, logging: false, useCORS: true })
       const imgData = canvas.toDataURL("image/png")
-      const pdf = new jsPDF("p", "mm", "a4")
+      const pdf = new jsPDF("l", "mm", "a4") // landscape for more space
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = pdf.internal.pageSize.getHeight()
-      const ratio = Math.min(pdfWidth / canvas.width, pdfHeight / canvas.height)
-      pdf.addImage(imgData, "PNG", (pdfWidth - canvas.width * ratio) / 2, 10, canvas.width * ratio, canvas.height * ratio)
-      pdf.save(`dashboard-${new Date().toISOString().split('T')[0]}.pdf`)
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      const x = (pdfWidth - imgWidth * ratio) / 2
+      pdf.addImage(imgData, "PNG", x, 5, imgWidth * ratio, imgHeight * ratio)
+      
+      // Add pages if content is too tall
+      const totalPages = Math.ceil((imgHeight * ratio) / (pdfHeight - 10))
+      if (totalPages > 1) {
+        for (let i = 1; i < totalPages; i++) {
+          pdf.addPage()
+          pdf.addImage(imgData, "PNG", x, 5 - i * (pdfHeight - 10), imgWidth * ratio, imgHeight * ratio)
+        }
+      }
+      
+      pdf.save(`dashboard-teledesk-${new Date().toISOString().split('T')[0]}.pdf`)
       toast({ title: "PDF exportado com sucesso!" })
     } catch (error) {
       console.error("Error exporting PDF:", error)
@@ -88,6 +104,9 @@ export function Dashboard() {
     percentage: totalTickets > 0 ? Math.round((p.count / totalTickets) * 100) : 0
   }))
 
+  const esc = data.escalationMetrics
+  const totalResolved = esc.ticketsResolvedN1 + esc.ticketsResolvedN2 + esc.ticketsResolvedN3
+
   return (
     <div className="space-y-6" ref={dashboardRef}>
       {/* Header */}
@@ -96,7 +115,7 @@ export function Dashboard() {
           <h2 className="text-3xl font-black tracking-tight">Dashboard Executivo</h2>
           <p className="text-muted-foreground flex items-center gap-2 text-sm">
             <Zap className="h-4 w-4 text-secondary" />
-            Visão estratégica e análise de performance em tempo real
+            Visão estratégica com métricas de escalonamento e performance em tempo real
           </p>
         </div>
         <Button onClick={handleExportPDF} variant="outline" className="gap-2">
@@ -106,7 +125,7 @@ export function Dashboard() {
       </div>
 
       {/* Team Performance Metrics */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -118,6 +137,19 @@ export function Dashboard() {
             <div className="text-3xl font-black text-primary">{data.teamMetrics.slaComplianceRate}%</div>
             <p className="text-xs text-muted-foreground mt-1">Meta: 95%</p>
             <Progress value={data.teamMetrics.slaComplianceRate} className="mt-2 h-2" />
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Clock className="h-4 w-4 text-secondary" />
+              MTTR
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black text-secondary">{data.teamMetrics.mttr}</div>
+            <p className="text-xs text-muted-foreground mt-1">Tempo médio de resolução</p>
           </CardContent>
         </Card>
 
@@ -137,19 +169,6 @@ export function Dashboard() {
         <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Zap className="h-4 w-4 text-secondary" />
-              Tempo Médio
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-secondary">{data.teamMetrics.avgResolutionTime}</div>
-            <p className="text-xs text-muted-foreground mt-1">Resolução média</p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-blue-500" />
               Chamados Ativos
             </CardTitle>
@@ -160,6 +179,113 @@ export function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ====== ESCALATION FLOW DIAGRAM ====== */}
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ArrowUpCircle className="h-5 w-5 text-orange-500" />
+            Fluxo de Escalonamento
+          </CardTitle>
+          <CardDescription>Diagrama do fluxo entre níveis de atendimento com métricas de resolução</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-4">
+            {/* Flow diagram */}
+            <div className="flex items-center justify-center gap-2 md:gap-4 w-full flex-wrap">
+              {/* N1 */}
+              <div className="flex flex-col items-center gap-2 min-w-[140px]">
+                <div className="w-32 h-32 rounded-2xl bg-blue-500/10 border-2 border-blue-500/30 flex flex-col items-center justify-center gap-1 relative">
+                  <Shield className="h-6 w-6 text-blue-500" />
+                  <span className="text-2xl font-black text-blue-600">{data.levelDistribution.n1}</span>
+                  <span className="text-xs font-medium text-blue-500">Nível 1</span>
+                  <span className="text-[10px] text-muted-foreground">Suporte Básico</span>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-green-600">{esc.ticketsResolvedN1} resolvidos</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {totalResolved > 0 ? Math.round((esc.ticketsResolvedN1 / totalResolved) * 100) : 0}% do total
+                  </div>
+                </div>
+              </div>
+
+              {/* Arrow N1 → N2 */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <ArrowRight className="h-5 w-5 text-orange-500" />
+                </div>
+                <Badge variant="outline" className="text-[10px] border-orange-500/30 text-orange-600">
+                  {esc.n1ToN2} escalonados
+                </Badge>
+              </div>
+
+              {/* N2 */}
+              <div className="flex flex-col items-center gap-2 min-w-[140px]">
+                <div className="w-32 h-32 rounded-2xl bg-orange-500/10 border-2 border-orange-500/30 flex flex-col items-center justify-center gap-1">
+                  <Shield className="h-6 w-6 text-orange-500" />
+                  <span className="text-2xl font-black text-orange-600">{data.levelDistribution.n2}</span>
+                  <span className="text-xs font-medium text-orange-500">Nível 2</span>
+                  <span className="text-[10px] text-muted-foreground">Suporte Técnico</span>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-green-600">{esc.ticketsResolvedN2} resolvidos</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {totalResolved > 0 ? Math.round((esc.ticketsResolvedN2 / totalResolved) * 100) : 0}% do total
+                  </div>
+                </div>
+              </div>
+
+              {/* Arrow N2 → N3 */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <ArrowRight className="h-5 w-5 text-red-500" />
+                </div>
+                <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-600">
+                  {esc.n2ToN3} escalonados
+                </Badge>
+              </div>
+
+              {/* N3 */}
+              <div className="flex flex-col items-center gap-2 min-w-[140px]">
+                <div className="w-32 h-32 rounded-2xl bg-red-500/10 border-2 border-red-500/30 flex flex-col items-center justify-center gap-1">
+                  <Shield className="h-6 w-6 text-red-500" />
+                  <span className="text-2xl font-black text-red-600">{data.levelDistribution.n3}</span>
+                  <span className="text-xs font-medium text-red-500">Nível 3</span>
+                  <span className="text-[10px] text-muted-foreground">Especialista</span>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-green-600">{esc.ticketsResolvedN3} resolvidos</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {totalResolved > 0 ? Math.round((esc.ticketsResolvedN3 / totalResolved) * 100) : 0}% do total
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary stats below */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-4 pt-4 border-t border-border">
+              <div className="text-center">
+                <div className="text-2xl font-black">{esc.totalEscalations}</div>
+                <div className="text-xs text-muted-foreground">Total Escalonamentos</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black">{esc.escalationRate}%</div>
+                <div className="text-xs text-muted-foreground">Taxa de Escalonamento</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black">{esc.avgTimeToEscalate}</div>
+                <div className="text-xs text-muted-foreground">Tempo Médio p/ Escalonar</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-black text-green-600">
+                  {totalResolved > 0 ? Math.round((esc.ticketsResolvedN1 / totalResolved) * 100) : 0}%
+                </div>
+                <div className="text-xs text-muted-foreground">Resolução no N1</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -180,6 +306,45 @@ export function Dashboard() {
           )
         })}
       </div>
+
+      {/* Monthly Trend */}
+      <Card className="rounded-2xl shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Tendência Mensal (6 meses)
+          </CardTitle>
+          <CardDescription>Comparativo de chamados criados vs resolvidos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {data.monthlyTrend.map((month) => {
+              const maxVal = Math.max(...data.monthlyTrend.map(m => Math.max(m.created, m.resolved)), 1)
+              return (
+                <div key={month.month} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium w-16">{month.month}</span>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-blue-500">Criados: {month.created}</span>
+                      <span className="text-green-500">Resolvidos: {month.resolved}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 h-5">
+                    <div
+                      className="bg-blue-500/70 rounded-sm transition-all"
+                      style={{ width: `${(month.created / maxVal) * 100}%`, minWidth: month.created > 0 ? '4px' : '0' }}
+                    />
+                    <div
+                      className="bg-green-500/70 rounded-sm transition-all"
+                      style={{ width: `${(month.resolved / maxVal) * 100}%`, minWidth: month.resolved > 0 ? '4px' : '0' }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Agent Performance */}
       <Card className="rounded-2xl shadow-sm">
@@ -282,6 +447,34 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Department Heatmap */}
+        <Card className="rounded-2xl shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building className="h-5 w-5 text-primary" />
+              Chamados por Setor
+            </CardTitle>
+            <CardDescription>Heatmap de demanda por departamento</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {data.departmentHeatmap.length > 0 ? (
+              data.departmentHeatmap.map((dept) => {
+                const maxDept = Math.max(...data.departmentHeatmap.map(d => d.count), 1)
+                const intensity = dept.count / maxDept
+                const bgOpacity = Math.max(0.1, intensity)
+                return (
+                  <div key={dept.department} className="flex items-center justify-between p-2 rounded-lg" style={{ backgroundColor: `rgba(177, 18, 38, ${bgOpacity * 0.2})` }}>
+                    <span className="text-sm font-medium">{dept.department}</span>
+                    <Badge variant="outline" className="text-xs font-bold">{dept.count}</Badge>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum dado disponível</p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Volume Chart */}
         <Card className="lg:col-span-2 rounded-2xl shadow-sm">
           <CardHeader>
@@ -298,6 +491,9 @@ export function Dashboard() {
                 const height = (day.tickets / maxTickets) * 100
                 return (
                   <div key={index} className="flex flex-col items-center gap-2 flex-1 group">
+                    <div className="text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      {day.tickets}
+                    </div>
                     <div
                       className="bg-primary/80 hover:bg-primary rounded-t-md w-full min-h-[4px] transition-colors"
                       style={{ height: `${Math.max(height, 4)}%` }}
