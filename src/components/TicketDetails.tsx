@@ -192,6 +192,17 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                   Concluir
                 </Button>
               )}
+
+              {/* Escalation button - only for agents with assigned ticket, level < 3 */}
+              {isAgent && ticket.assigned_to && (ticket.nivel_atendimento || 1) < 3 && user && (
+                <EscalationDialog
+                  ticketId={ticket.id}
+                  currentLevel={ticket.nivel_atendimento || 1}
+                  userId={user.id}
+                  empresaId={empresaId}
+                  onEscalated={onClose}
+                />
+              )}
             </div>
           )}
         </SheetHeader>
