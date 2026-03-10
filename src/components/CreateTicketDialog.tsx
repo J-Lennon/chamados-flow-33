@@ -214,6 +214,9 @@ export function CreateTicketDialog({
                   <Badge variant="outline" className="text-xs">
                     Urgência: {aiClassification.urgency}
                   </Badge>
+                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">
+                    Nível: N{aiClassification.nivel_atendimento || 1}
+                  </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{aiClassification.summary}</p>
                 {!aiClassification.isWellDescribed && aiClassification.improvementSuggestion && (
