@@ -110,6 +110,7 @@ export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) 
               <TableHead>Departamento</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Prioridade</TableHead>
+              <TableHead>Nível</TableHead>
               <TableHead>Responsável</TableHead>
               <TableHead>
                 <TooltipProvider>
