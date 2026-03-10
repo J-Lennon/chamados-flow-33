@@ -136,10 +136,11 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
         <SheetHeader className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <SheetTitle className="font-mono text-lg">#{ticket.id.slice(0, 8)}</SheetTitle>
                 <StatusBadge status={ticket.status as any} />
                 <PriorityBadge priority={ticket.priority as any} />
+                <LevelBadge level={ticket.nivel_atendimento || 1} />
               </div>
               <h2 className="text-xl font-semibold leading-tight">{ticket.title}</h2>
             </div>
