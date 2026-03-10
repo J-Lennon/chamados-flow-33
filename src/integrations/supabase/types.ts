@@ -82,6 +82,61 @@ export type Database = {
           },
         ]
       }
+      ticket_escalations: {
+        Row: {
+          created_at: string | null
+          empresa_id: string | null
+          escalated_by: string | null
+          from_level: number
+          id: string
+          reason: string | null
+          ticket_id: string
+          to_level: number
+        }
+        Insert: {
+          created_at?: string | null
+          empresa_id?: string | null
+          escalated_by?: string | null
+          from_level: number
+          id?: string
+          reason?: string | null
+          ticket_id: string
+          to_level: number
+        }
+        Update: {
+          created_at?: string | null
+          empresa_id?: string | null
+          escalated_by?: string | null
+          from_level?: number
+          id?: string
+          reason?: string | null
+          ticket_id?: string
+          to_level?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_escalations_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_escalations_escalated_by_fkey"
+            columns: ["escalated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_escalations_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_history: {
         Row: {
           action: string
@@ -194,7 +249,11 @@ export type Database = {
           department: string | null
           description: string
           empresa_id: string | null
+          escalated_at: string | null
+          escalated_from: string | null
+          escalation_reason: string | null
           id: string
+          nivel_atendimento: number
           priority: string | null
           requester_id: string | null
           sla_due_date: string | null
@@ -209,7 +268,11 @@ export type Database = {
           department?: string | null
           description: string
           empresa_id?: string | null
+          escalated_at?: string | null
+          escalated_from?: string | null
+          escalation_reason?: string | null
           id?: string
+          nivel_atendimento?: number
           priority?: string | null
           requester_id?: string | null
           sla_due_date?: string | null
@@ -224,7 +287,11 @@ export type Database = {
           department?: string | null
           description?: string
           empresa_id?: string | null
+          escalated_at?: string | null
+          escalated_from?: string | null
+          escalation_reason?: string | null
           id?: string
+          nivel_atendimento?: number
           priority?: string | null
           requester_id?: string | null
           sla_due_date?: string | null
@@ -245,6 +312,13 @@ export type Database = {
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_escalated_from_fkey"
+            columns: ["escalated_from"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
