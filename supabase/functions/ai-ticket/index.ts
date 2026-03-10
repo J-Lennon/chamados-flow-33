@@ -76,6 +76,11 @@ ${ticketData.department ? `Departamento: ${ticketData.department}` : ""}`;
                   enum: ["baixa", "media", "alta", "critica"],
                   description: "Nível de urgência real baseado no contexto"
                 },
+                nivel_atendimento: {
+                  type: "integer",
+                  enum: [1, 2, 3],
+                  description: "Nível de atendimento sugerido: 1=suporte básico (reset senha, dúvidas simples), 2=suporte técnico (configuração, diagnóstico avançado), 3=especialista/engenharia (infraestrutura crítica, segurança, desenvolvimento)"
+                },
                 summary: {
                   type: "string",
                   description: "Resumo conciso do problema em uma frase (máximo 100 caracteres)"
@@ -89,7 +94,7 @@ ${ticketData.department ? `Departamento: ${ticketData.department}` : ""}`;
                   description: "Se mal descrito, sugestão do que o usuário deveria informar. Vazio se bem descrito."
                 }
               },
-              required: ["priority", "category", "urgency", "summary", "isWellDescribed", "improvementSuggestion"],
+              required: ["priority", "category", "urgency", "nivel_atendimento", "summary", "isWellDescribed", "improvementSuggestion"],
               additionalProperties: false
             }
           }

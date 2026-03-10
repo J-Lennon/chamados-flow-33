@@ -16,6 +16,10 @@ export interface Ticket {
   sla_due_date: string
   created_at: string
   updated_at: string
+  nivel_atendimento: number
+  escalated_from?: string
+  escalated_at?: string
+  escalation_reason?: string
   requester?: {
     full_name: string
   }
