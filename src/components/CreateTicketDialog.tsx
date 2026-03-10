@@ -107,6 +107,7 @@ export function CreateTicketDialog({
         requester_id: user.id,
         status: "new",
         empresa_id: empresaId,
+        nivel_atendimento: aiClassification?.nivel_atendimento || 1,
       })
 
       if (error) throw error
