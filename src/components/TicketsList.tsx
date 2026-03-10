@@ -171,6 +171,9 @@ export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) 
                       <PriorityBadge priority={ticket.priority as any} />
                     </TableCell>
                     <TableCell>
+                      <LevelBadge level={ticket.nivel_atendimento || 1} />
+                    </TableCell>
+                    <TableCell>
                       {ticket.assignee?.full_name ? (
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
