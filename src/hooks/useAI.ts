@@ -6,6 +6,7 @@ interface ClassifyResult {
   priority: string
   category: string
   urgency: string
+  nivel_atendimento: number
   summary: string
   isWellDescribed: boolean
   improvementSuggestion: string

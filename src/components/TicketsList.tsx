@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
+import { LevelBadge } from "./LevelBadge"
 import { MoreHorizontal, Eye, Info } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -109,6 +110,7 @@ export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) 
               <TableHead>Departamento</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Prioridade</TableHead>
+              <TableHead>Nível</TableHead>
               <TableHead>Responsável</TableHead>
               <TableHead>
                 <TooltipProvider>
@@ -167,6 +169,9 @@ export function TicketsList({ onTicketSelect, statusFilter }: TicketsListProps) 
                     </TableCell>
                     <TableCell>
                       <PriorityBadge priority={ticket.priority as any} />
+                    </TableCell>
+                    <TableCell>
+                      <LevelBadge level={ticket.nivel_atendimento || 1} />
                     </TableCell>
                     <TableCell>
                       {ticket.assignee?.full_name ? (

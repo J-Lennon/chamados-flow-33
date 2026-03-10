@@ -20,6 +20,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
+import { LevelBadge } from "./LevelBadge"
+import { EscalationDialog } from "./EscalationDialog"
 import { Ticket, useTickets } from "@/hooks/useTickets"
 import { useTicketMessages } from "@/hooks/useTicketMessages"
 import { useTicketHistory } from "@/hooks/useTicketHistory"
@@ -39,6 +41,7 @@ import {
   Send,
   Sparkles,
   Loader2,
+  ArrowUpCircle,
 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
@@ -133,10 +136,11 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
         <SheetHeader className="space-y-4">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <SheetTitle className="font-mono text-lg">#{ticket.id.slice(0, 8)}</SheetTitle>
                 <StatusBadge status={ticket.status as any} />
                 <PriorityBadge priority={ticket.priority as any} />
+                <LevelBadge level={ticket.nivel_atendimento || 1} />
               </div>
               <h2 className="text-xl font-semibold leading-tight">{ticket.title}</h2>
             </div>
@@ -187,6 +191,17 @@ export function TicketDetails({ ticket, isOpen, onClose }: TicketDetailsProps) {
                   <CheckCircle className="mr-2 h-4 w-4" />
                   Concluir
                 </Button>
+              )}
+
+              {/* Escalation button - only for agents with assigned ticket, level < 3 */}
+              {isAgent && ticket.assigned_to && (ticket.nivel_atendimento || 1) < 3 && user && (
+                <EscalationDialog
+                  ticketId={ticket.id}
+                  currentLevel={ticket.nivel_atendimento || 1}
+                  userId={user.id}
+                  empresaId={empresaId}
+                  onEscalated={onClose}
+                />
               )}
             </div>
           )}
