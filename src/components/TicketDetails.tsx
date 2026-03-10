@@ -20,6 +20,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { StatusBadge, PriorityBadge } from "./StatusBadge"
+import { LevelBadge } from "./LevelBadge"
+import { EscalationDialog } from "./EscalationDialog"
 import { Ticket, useTickets } from "@/hooks/useTickets"
 import { useTicketMessages } from "@/hooks/useTicketMessages"
 import { useTicketHistory } from "@/hooks/useTicketHistory"
@@ -39,6 +41,7 @@ import {
   Send,
   Sparkles,
   Loader2,
+  ArrowUpCircle,
 } from "lucide-react"
 import { formatDistanceToNow, format } from "date-fns"
 import { ptBR } from "date-fns/locale"
