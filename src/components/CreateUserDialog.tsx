@@ -140,7 +140,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite a senha"
                 required
-                minLength={6}
+                minLength={8}
               />
             </div>
 
