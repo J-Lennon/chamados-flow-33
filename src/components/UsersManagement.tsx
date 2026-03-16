@@ -32,6 +32,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Edit, Trash2, Loader2, Users } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -52,6 +59,7 @@ export function UsersManagement() {
   const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null)
   const [newName, setNewName] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [newRole, setNewRole] = useState<string>("")
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
@@ -105,6 +113,7 @@ export function UsersManagement() {
     setEditUser(userProfile)
     setNewName(userProfile.full_name)
     setNewPassword("")
+    setNewRole(userProfile.role || "user")
   }
 
   const handleUpdateUser = async () => {
@@ -129,7 +138,8 @@ export function UsersManagement() {
             userData: {
               userId: editUser.id,
               fullName: newName !== editUser.full_name ? newName : undefined,
-              password: newPassword || undefined
+              password: newPassword || undefined,
+              role: newRole !== editUser.role ? newRole : undefined
             }
           })
         }
@@ -276,7 +286,7 @@ export function UsersManagement() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        {isAdmin && (
+                        {isAdmin || isAgent ? (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -285,7 +295,7 @@ export function UsersManagement() {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        )}
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -325,7 +335,22 @@ export function UsersManagement() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Deixe em branco para não alterar"
+                minLength={8}
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-role">Permissão</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger id="edit-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Usuário Comum</SelectItem>
+                  <SelectItem value="agent">Suporte (Agente)</SelectItem>
+                  {isAdmin && <SelectItem value="admin">Administrador</SelectItem>}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

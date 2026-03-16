@@ -21,7 +21,8 @@ const updateUserSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
   fullName: z.string().trim().min(1).max(100).regex(nameRegex, 'Only letters, spaces, and hyphens allowed').optional(),
   password: z.string().min(8).max(72).optional(),
-}).refine(data => data.fullName || data.password, { message: 'At least one field to update is required' })
+  role: z.enum(['user', 'agent', 'admin']).optional(),
+}).refine(data => data.fullName || data.password || data.role, { message: 'At least one field to update is required' })
 
 const deleteUserSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
@@ -184,6 +185,22 @@ serve(async (req) => {
             .eq('id', validated.userId)
         }
 
+        // Update role if provided
+        if (validated.role) {
+          // Prevent agents from promoting to admin
+          if (roleData.role === 'agent' && validated.role === 'admin') {
+            return new Response(JSON.stringify({ error: 'Agents cannot promote users to admin' }), {
+              status: 403,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+          }
+
+          await supabaseAdmin
+            .from('user_roles')
+            .update({ role: validated.role })
+            .eq('user_id', validated.userId)
+        }
+
         return new Response(
           JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -191,15 +208,22 @@ serve(async (req) => {
       }
 
       case 'delete': {
-        // Only admins can delete users
-        if (roleData.role !== 'admin') {
-          return new Response(JSON.stringify({ error: 'Only admins can delete users' }), {
+        // Admins and agents can delete users, but agents cannot delete admins
+        const validated = deleteUserSchema.parse(userData)
+
+        // Check target user's role
+        const { data: targetRoleData } = await supabaseAdmin
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', validated.userId)
+          .single()
+
+        if (roleData.role === 'agent' && targetRoleData?.role === 'admin') {
+          return new Response(JSON.stringify({ error: 'Agents cannot delete admin users' }), {
             status: 403,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           })
         }
-
-        const validated = deleteUserSchema.parse(userData)
 
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(validated.userId)
 
