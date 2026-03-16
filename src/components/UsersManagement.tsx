@@ -138,7 +138,8 @@ export function UsersManagement() {
             userData: {
               userId: editUser.id,
               fullName: newName !== editUser.full_name ? newName : undefined,
-              password: newPassword || undefined
+              password: newPassword || undefined,
+              role: newRole !== editUser.role ? newRole : undefined
             }
           })
         }
