@@ -113,6 +113,7 @@ export function UsersManagement() {
     setEditUser(userProfile)
     setNewName(userProfile.full_name)
     setNewPassword("")
+    setNewRole(userProfile.role || "user")
   }
 
   const handleUpdateUser = async () => {
