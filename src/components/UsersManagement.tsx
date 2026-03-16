@@ -286,7 +286,7 @@ export function UsersManagement() {
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        {isAdmin && (
+                        {isAdmin || isAgent ? (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -295,7 +295,7 @@ export function UsersManagement() {
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
-                        )}
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
