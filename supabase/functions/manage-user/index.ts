@@ -185,6 +185,22 @@ serve(async (req) => {
             .eq('id', validated.userId)
         }
 
+        // Update role if provided
+        if (validated.role) {
+          // Prevent agents from promoting to admin
+          if (roleData.role === 'agent' && validated.role === 'admin') {
+            return new Response(JSON.stringify({ error: 'Agents cannot promote users to admin' }), {
+              status: 403,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+          }
+
+          await supabaseAdmin
+            .from('user_roles')
+            .update({ role: validated.role })
+            .eq('user_id', validated.userId)
+        }
+
         return new Response(
           JSON.stringify({ success: true }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
