@@ -352,6 +352,7 @@ export function UsersManagement() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>
