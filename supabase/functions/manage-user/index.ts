@@ -21,7 +21,8 @@ const updateUserSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
   fullName: z.string().trim().min(1).max(100).regex(nameRegex, 'Only letters, spaces, and hyphens allowed').optional(),
   password: z.string().min(8).max(72).optional(),
-}).refine(data => data.fullName || data.password, { message: 'At least one field to update is required' })
+  role: z.enum(['user', 'agent', 'admin']).optional(),
+}).refine(data => data.fullName || data.password || data.role, { message: 'At least one field to update is required' })
 
 const deleteUserSchema = z.object({
   userId: z.string().uuid('Invalid user ID'),
