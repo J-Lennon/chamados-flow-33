@@ -335,9 +335,23 @@ export function UsersManagement() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Deixe em branco para não alterar"
+                minLength={8}
               />
             </div>
-          </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-role">Permissão</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger id="edit-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Usuário Comum</SelectItem>
+                  <SelectItem value="agent">Suporte (Agente)</SelectItem>
+                  {isAdmin && <SelectItem value="admin">Administrador</SelectItem>}
+                </SelectContent>
+              </Select>
+            </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditUser(null)}>
