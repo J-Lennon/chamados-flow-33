@@ -118,23 +118,35 @@ serve(async (req) => {
 
         if (createError) throw createError
 
-        // Assign role with empresa_id
+        // Update role and empresa_id (trigger already created the row, so update it)
         const { error: roleError } = await supabaseAdmin
           .from('user_roles')
-          .insert({
-            user_id: newUser.user.id,
+          .update({
             role: validated.role,
             empresa_id: callerEmpresaId
           })
+          .eq('user_id', newUser.user.id)
+
+        if (roleError) {
+          console.error('Error updating role:', roleError)
+          // Fallback: try insert if update found nothing
+          await supabaseAdmin
+            .from('user_roles')
+            .insert({
+              user_id: newUser.user.id,
+              role: validated.role,
+              empresa_id: callerEmpresaId
+            })
+        }
 
         // Update profile with empresa_id
-        await supabaseAdmin
+        const { error: profileError } = await supabaseAdmin
           .from('profiles')
           .update({ empresa_id: callerEmpresaId })
           .eq('id', newUser.user.id)
 
-        if (roleError) {
-          console.error('Error assigning role:', roleError)
+        if (profileError) {
+          console.error('Error updating profile empresa_id:', profileError)
         }
 
         return new Response(
