@@ -207,8 +207,9 @@ export function UsersManagement() {
         description: "O usuário foi removido do sistema.",
       })
 
+      // Remove user from local state immediately
+      setUsers(prev => prev.filter(u => u.id !== deleteUser.id))
       setDeleteUser(null)
-      fetchUsers()
     } catch (error: any) {
       console.error("Error deleting user:", error)
       toast({
