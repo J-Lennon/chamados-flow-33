@@ -59,6 +59,7 @@ export function UsersManagement() {
   const [deleteUser, setDeleteUser] = useState<UserProfile | null>(null)
   const [newName, setNewName] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [newRole, setNewRole] = useState<string>("")
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
