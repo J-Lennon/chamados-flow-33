@@ -208,15 +208,22 @@ serve(async (req) => {
       }
 
       case 'delete': {
-        // Only admins can delete users
-        if (roleData.role !== 'admin') {
-          return new Response(JSON.stringify({ error: 'Only admins can delete users' }), {
+        // Admins and agents can delete users, but agents cannot delete admins
+        const validated = deleteUserSchema.parse(userData)
+
+        // Check target user's role
+        const { data: targetRoleData } = await supabaseAdmin
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', validated.userId)
+          .single()
+
+        if (roleData.role === 'agent' && targetRoleData?.role === 'admin') {
+          return new Response(JSON.stringify({ error: 'Agents cannot delete admin users' }), {
             status: 403,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           })
         }
-
-        const validated = deleteUserSchema.parse(userData)
 
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(validated.userId)
 
