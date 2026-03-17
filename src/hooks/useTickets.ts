@@ -47,7 +47,7 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
 
       // Aplicar filtro de status
       if (statusFilter === 'active') {
-        query = query.in('status', ['new', 'progress', 'waiting', 'accepted'])
+        query = query.in('status', ['new', 'progress', 'waiting'])
       } else if (statusFilter === 'completed') {
         query = query.in('status', ['completed', 'closed', 'rejected'])
       }
