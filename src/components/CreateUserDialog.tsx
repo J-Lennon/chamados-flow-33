@@ -29,7 +29,7 @@ interface CreateUserDialogProps {
   onUserCreated?: () => void
 }
 
-export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }: CreateUserDialogProps) {
+export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger, onUserCreated }: CreateUserDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
