@@ -94,8 +94,7 @@ ${ticketData.department ? `Departamento: ${ticketData.department}` : ""}`;
                   description: "Se mal descrito, sugestão do que o usuário deveria informar. Vazio se bem descrito."
                 }
               },
-              required: ["priority", "category", "urgency", "nivel_atendimento", "summary", "isWellDescribed", "improvementSuggestion"],
-              additionalProperties: false
+              required: ["priority", "category", "urgency", "nivel_atendimento", "summary", "isWellDescribed", "improvementSuggestion"]
             }
           }
         }];
@@ -139,8 +138,7 @@ Sugira uma resposta adequada para o técnico de suporte enviar.`;
                   description: "Nota interna com diagnóstico ou próximos passos para a equipe"
                 }
               },
-              required: ["suggestedResponse", "internalNote"],
-              additionalProperties: false
+              required: ["suggestedResponse", "internalNote"]
             }
           }
         }];
@@ -174,8 +172,7 @@ Gere um artigo de base de conhecimento baseado neste chamado.`;
                 solution: { type: "string", description: "Passo a passo da solução" },
                 tags: { type: "array", items: { type: "string" }, description: "Tags relevantes" }
               },
-              required: ["title", "problem", "solution", "tags"],
-              additionalProperties: false
+              required: ["title", "problem", "solution", "tags"]
             }
           }
         }];
