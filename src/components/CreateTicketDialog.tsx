@@ -44,19 +44,14 @@ export function CreateTicketDialog({
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState("medium")
   const [city, setCity] = useState("")
   const [department, setDepartment] = useState("")
-  const [aiClassification, setAiClassification] = useState<any>(null)
   const { toast } = useToast()
   const { user } = useAuth()
   const { empresaId } = useEmpresa(user?.id)
   const { classifyTicket, loading: aiLoading } = useAI()
 
   const handleOpenChange = (value: boolean) => {
-    if (!value) {
-      setAiClassification(null)
-    }
     if (onOpenChange) {
       onOpenChange(value)
     } else {
@@ -65,27 +60,6 @@ export function CreateTicketDialog({
   }
 
   const isControlled = open !== undefined
-
-  const handleAIClassify = async () => {
-    if (!title.trim() || !description.trim()) {
-      toast({
-        title: "Preencha título e descrição",
-        description: "A IA precisa do título e descrição para classificar",
-        variant: "destructive",
-      })
-      return
-    }
-
-    const result = await classifyTicket({ title, description, department })
-    if (result) {
-      setAiClassification(result)
-      setPriority(result.priority)
-      toast({
-        title: "🤖 Classificação IA concluída",
-        description: `Prioridade sugerida: ${result.priority.toUpperCase()} | Categoria: ${result.category}`,
-      })
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,6 +72,16 @@ export function CreateTicketDialog({
         throw new Error("Usuário não autenticado")
       }
 
+      // AI classifies automatically
+      let priority = "medium"
+      let nivelAtendimento = 1
+      
+      const aiResult = await classifyTicket({ title, description, department })
+      if (aiResult) {
+        priority = aiResult.priority
+        nivelAtendimento = aiResult.nivel_atendimento || 1
+      }
+
       const { error } = await supabase.from("tickets").insert({
         title,
         description,
@@ -107,22 +91,20 @@ export function CreateTicketDialog({
         requester_id: user.id,
         status: "new",
         empresa_id: empresaId,
-        nivel_atendimento: aiClassification?.nivel_atendimento || 1,
+        nivel_atendimento: nivelAtendimento,
       })
 
       if (error) throw error
 
       toast({
         title: "Chamado criado!",
-        description: "Seu chamado foi aberto com sucesso.",
+        description: `Prioridade definida pela IA: ${priority.toUpperCase()}`,
       })
 
       setTitle("")
       setDescription("")
-      setPriority("medium")
       setCity("")
       setDepartment("")
-      setAiClassification(null)
       
       handleOpenChange(false)
       
@@ -138,13 +120,6 @@ export function CreateTicketDialog({
     } finally {
       setLoading(false)
     }
-  }
-
-  const priorityLabels: Record<string, string> = {
-    low: "Baixa",
-    medium: "Média",
-    high: "Alta",
-    critical: "Crítica",
   }
 
   return (
