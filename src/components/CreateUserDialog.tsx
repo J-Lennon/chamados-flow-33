@@ -85,6 +85,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger, 
       setPassword("")
       setRole("user")
       setOpen(false)
+      onUserCreated?.()
     } catch (error: any) {
       console.error("Error creating user:", error)
       toast({

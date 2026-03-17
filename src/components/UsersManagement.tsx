@@ -68,6 +68,17 @@ export function UsersManagement() {
     }
   }, [isAdmin, isAgent])
 
+  useEffect(() => {
+    if (!isAdmin && !isAgent) return
+    const channel = supabase
+      .channel("profiles-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => {
+        fetchUsers()
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [isAdmin, isAgent])
+
   const fetchUsers = async () => {
     try {
       setLoading(true)

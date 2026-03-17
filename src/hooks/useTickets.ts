@@ -192,7 +192,7 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
 
     // Subscribe to ticket changes
     const channel = supabase
-      .channel("tickets-changes")
+      .channel(`tickets-changes-${statusFilter || 'all'}`)
       .on(
         "postgres_changes",
         {
