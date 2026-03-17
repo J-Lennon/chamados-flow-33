@@ -242,6 +242,8 @@ serve(async (req) => {
         )
     }
   } catch (error) {
+    console.error('Edge function error:', error)
+    
     // Handle zod validation errors specifically
     if (error instanceof z.ZodError) {
       return new Response(
@@ -250,8 +252,9 @@ serve(async (req) => {
       )
     }
 
+    const message = error instanceof Error ? error.message : 'An error occurred processing your request'
     return new Response(
-      JSON.stringify({ error: 'An error occurred processing your request' }),
+      JSON.stringify({ error: message }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
