@@ -196,7 +196,7 @@ export type Database = {
           id: string
           is_internal: boolean | null
           message: string
-          sender_id: string
+          sender_id: string | null
           ticket_id: string
         }
         Insert: {
@@ -205,7 +205,7 @@ export type Database = {
           id?: string
           is_internal?: boolean | null
           message: string
-          sender_id: string
+          sender_id?: string | null
           ticket_id: string
         }
         Update: {
@@ -214,7 +214,7 @@ export type Database = {
           id?: string
           is_internal?: boolean | null
           message?: string
-          sender_id?: string
+          sender_id?: string | null
           ticket_id?: string
         }
         Relationships: [

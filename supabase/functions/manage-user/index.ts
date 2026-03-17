@@ -225,6 +225,18 @@ serve(async (req) => {
           })
         }
 
+        const cleanupOperations = await Promise.all([
+          supabaseAdmin.from('ticket_messages').update({ sender_id: null }).eq('sender_id', validated.userId),
+          supabaseAdmin.from('ticket_history').update({ performed_by: null }).eq('performed_by', validated.userId),
+          supabaseAdmin.from('ticket_escalations').update({ escalated_by: null }).eq('escalated_by', validated.userId),
+          supabaseAdmin.from('tickets').update({ assigned_to: null }).eq('assigned_to', validated.userId),
+          supabaseAdmin.from('tickets').update({ requester_id: null }).eq('requester_id', validated.userId),
+          supabaseAdmin.from('tickets').update({ escalated_from: null }).eq('escalated_from', validated.userId),
+        ])
+
+        const cleanupError = cleanupOperations.find(result => result.error)?.error
+        if (cleanupError) throw cleanupError
+
         const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(validated.userId)
 
         if (deleteError) throw deleteError
