@@ -172,8 +172,7 @@ Gere um artigo de base de conhecimento baseado neste chamado.`;
                 solution: { type: "string", description: "Passo a passo da solução" },
                 tags: { type: "array", items: { type: "string" }, description: "Tags relevantes" }
               },
-              required: ["title", "problem", "solution", "tags"],
-              additionalProperties: false
+              required: ["title", "problem", "solution", "tags"]
             }
           }
         }];
