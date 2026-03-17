@@ -70,19 +70,32 @@ export function useTickets(statusFilter?: 'active' | 'completed') {
 
   const acceptTicket = async (ticketId: string, userId: string) => {
     try {
-      const { error } = await supabase
+      // Only accept tickets that are still "new" (not already accepted by someone else)
+      const { data, error } = await supabase
         .from("tickets")
         .update({ 
-          status: "accepted", 
+          status: "progress", 
           assigned_to: userId 
         })
         .eq("id", ticketId)
+        .eq("status", "new")
+        .select()
 
       if (error) throw error
 
+      if (!data || data.length === 0) {
+        toast({
+          title: "Chamado indisponível",
+          description: "Este chamado já foi aceito por outro agente",
+          variant: "destructive",
+        })
+        await fetchTickets()
+        return
+      }
+
       toast({
         title: "Chamado aceito",
-        description: "O chamado foi atribuído a você",
+        description: "O chamado foi atribuído a você e está em andamento",
       })
 
       await fetchTickets()
