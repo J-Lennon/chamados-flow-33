@@ -26,9 +26,10 @@ interface CreateUserDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   trigger?: React.ReactNode
+  onUserCreated?: () => void
 }
 
-export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }: CreateUserDialogProps) {
+export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger, onUserCreated }: CreateUserDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false)
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = onOpenChange || setInternalOpen
@@ -84,6 +85,7 @@ export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }
       setPassword("")
       setRole("user")
       setOpen(false)
+      onUserCreated?.()
     } catch (error: any) {
       console.error("Error creating user:", error)
       toast({
