@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { useAuth } from "@/hooks/useAuth"
 import { useAI } from "@/hooks/useAI"
-import { Plus, Loader2, Sparkles, AlertTriangle } from "lucide-react"
+import { Plus, Loader2, Sparkles } from "lucide-react"
 
 interface CreateTicketDialogProps {
   open?: boolean
