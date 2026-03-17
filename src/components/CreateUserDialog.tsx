@@ -26,6 +26,7 @@ interface CreateUserDialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   trigger?: React.ReactNode
+  onUserCreated?: () => void
 }
 
 export function CreateUserDialog({ open: controlledOpen, onOpenChange, trigger }: CreateUserDialogProps) {
