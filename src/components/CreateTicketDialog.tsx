@@ -155,53 +155,6 @@ export function CreateTicketDialog({
               />
             </div>
 
-            {/* AI Classification Button */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAIClassify}
-              disabled={aiLoading || !title.trim() || !description.trim()}
-              className="border-secondary/50 hover:bg-secondary/10 text-secondary-foreground"
-            >
-              {aiLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="mr-2 h-4 w-4 text-secondary" />
-              )}
-              Classificar com IA
-            </Button>
-
-            {/* AI Result */}
-            {aiClassification && (
-              <div className="rounded-lg border border-secondary/30 bg-secondary/5 p-3 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Sparkles className="h-4 w-4 text-secondary" />
-                  Análise da IA
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    Prioridade: {priorityLabels[aiClassification.priority] || aiClassification.priority}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    Categoria: {aiClassification.category}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    Urgência: {aiClassification.urgency}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">
-                    Nível: N{aiClassification.nivel_atendimento || 1}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">{aiClassification.summary}</p>
-                {!aiClassification.isWellDescribed && aiClassification.improvementSuggestion && (
-                  <div className="flex items-start gap-2 p-2 rounded bg-destructive/10 border border-destructive/20">
-                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                    <p className="text-xs text-destructive">{aiClassification.improvementSuggestion}</p>
-                  </div>
-                )}
-              </div>
-            )}
-
             <div className="grid gap-2">
               <Label htmlFor="city">Cidade</Label>
               <Select value={city} onValueChange={setCity} required>
@@ -224,19 +177,10 @@ export function CreateTicketDialog({
                 placeholder="Ex: TI, Suporte, RH"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="priority">Prioridade</Label>
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Baixa</SelectItem>
-                  <SelectItem value="medium">Média</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="critical">Crítica</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Sparkles className="h-3 w-3" />
+              A prioridade e nível de atendimento serão definidos automaticamente pela IA
             </div>
           </div>
           <DialogFooter>
