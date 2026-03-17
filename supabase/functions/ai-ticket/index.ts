@@ -94,8 +94,7 @@ ${ticketData.department ? `Departamento: ${ticketData.department}` : ""}`;
                   description: "Se mal descrito, sugestão do que o usuário deveria informar. Vazio se bem descrito."
                 }
               },
-              required: ["priority", "category", "urgency", "nivel_atendimento", "summary", "isWellDescribed", "improvementSuggestion"],
-              additionalProperties: false
+              required: ["priority", "category", "urgency", "nivel_atendimento", "summary", "isWellDescribed", "improvementSuggestion"]
             }
           }
         }];
