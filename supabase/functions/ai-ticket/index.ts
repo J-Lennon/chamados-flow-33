@@ -138,8 +138,7 @@ Sugira uma resposta adequada para o técnico de suporte enviar.`;
                   description: "Nota interna com diagnóstico ou próximos passos para a equipe"
                 }
               },
-              required: ["suggestedResponse", "internalNote"],
-              additionalProperties: false
+              required: ["suggestedResponse", "internalNote"]
             }
           }
         }];
